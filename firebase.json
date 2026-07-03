@@ -1,31 +1,17 @@
 {
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "storage": {
-    "rules": "storage.rules"
-  },
   "hosting": {
     "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**",
-      "index.html"
+      "**/node_modules/**"
     ],
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
       {
-        "source": "/go/**",
-        "function": "affiliateRedirect",
-        "region": "us-central1"
-      },
-      {
         "source": "**",
-        "function": "ssr",
-        "region": "us-central1"
+        "destination": "/index.html"
       }
     ],
     "headers": [
@@ -39,28 +25,6 @@
         ]
       },
       {
-        "source": "/sw.js",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
-      },
-      {
-        "source": "/site.webmanifest",
-        "headers": [
-          {
-            "key": "Content-Type",
-            "value": "application/manifest+json; charset=utf-8"
-          },
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=3600"
-          }
-        ]
-      },
-      {
         "source": "**",
         "headers": [
           { "key": "X-Content-Type-Options", "value": "nosniff" },
@@ -69,17 +33,5 @@
         ]
       }
     ]
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log"
-      ]
-    }
-  ]
+  }
 }
