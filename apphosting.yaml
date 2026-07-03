@@ -6,7 +6,7 @@ runConfig:
   maxInstances: 10
   concurrency: 80
   cpu: 1
-  memoryMiB: 512
+  memoryMiB: 1024
 
 scripts:
   buildCommand: npm run build
@@ -15,5 +15,34 @@ scripts:
 env:
   - variable: NODE_ENV
     value: production
-  - variable: PORT
-    value: "8080"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NDN_ACADEMY_APP_NAME
+    value: ndn-analytics-academy
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: VITE_FIREBASE_PROJECT_ID
+    value: ndn-analytics-academy
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: VITE_FIREBASE_AUTH_DOMAIN
+    value: ndn-analytics-academy.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: VITE_FIREBASE_STORAGE_BUCKET
+    value: ndn-analytics-academy.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: GEMINI_API_KEY
+    secret: geminiApiKey
+    availability:
+      - RUNTIME
+  - variable: ANTHROPIC_API_KEY
+    secret: anthropicApiKey
+    availability:
+      - RUNTIME
