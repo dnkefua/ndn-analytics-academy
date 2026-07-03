@@ -1,7 +1,7 @@
 import { LearnerProgress, QuizAttempt, LabSubmission, ProjectSubmission, EarnedCertificate } from '../types/academy';
 import { DEFAULT_DEMO_LEARNER } from '../data/demoLearner';
 
-const STORAGE_KEY = "ndn-academy-demo-progress-v1";
+const STORAGE_KEY = "ndn-academy-demo-progress-v2";
 
 export const getProgress = (): LearnerProgress => {
   try {

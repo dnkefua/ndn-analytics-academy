@@ -5,6 +5,7 @@ import { MODULES } from '../data/modules';
 import { LESSONS } from '../data/lessons';
 import { LABS } from '../data/labs';
 import { LabStudio } from './LabStudio';
+import { Markdown } from './Markdown';
 import { ArrowLeft, ArrowRight, CheckCircle, Play, BookOpen, Terminal, HelpCircle, FileText, Download, Award, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface LessonViewProps {
@@ -173,8 +174,8 @@ export const LessonView: React.FC<LessonViewProps> = ({
             )}
 
             {activeLesson.readingMarkdown && (
-              <div className="prose prose-invert max-w-none bg-slate-950/60 p-6 rounded-xl border border-slate-800/80 text-sm text-slate-300 leading-relaxed">
-                <pre className="font-sans whitespace-pre-wrap leading-relaxed">{activeLesson.readingMarkdown}</pre>
+              <div className="bg-slate-950/60 p-6 sm:p-8 rounded-xl border border-slate-800/80">
+                <Markdown source={activeLesson.readingMarkdown} />
               </div>
             )}
 
@@ -205,6 +206,23 @@ export const LessonView: React.FC<LessonViewProps> = ({
                   </h4>
                   <p className="text-xs text-slate-300 leading-relaxed">{activeLesson.notes.proTip}</p>
                 </div>
+
+                {activeLesson.notes.keyTerms && activeLesson.notes.keyTerms.length > 0 && (
+                  <div className="md:col-span-2 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Key Terms Glossary</span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {activeLesson.notes.keyTerms.map((kt, idx) => (
+                        <div key={idx} className="p-3 rounded-lg bg-slate-900/60 border border-slate-800/80 space-y-1">
+                          <span className="text-xs font-bold text-white block">{kt.term}</span>
+                          <span className="text-[11px] text-slate-400 leading-relaxed block">{kt.definition}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

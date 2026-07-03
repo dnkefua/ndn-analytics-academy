@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Course, EarnedCertificate, LearnerProgress } from '../types/academy';
 import { COURSES } from '../data/courses';
 import { checkCertificateEligibility, issueCertificateIfEligible } from '../services/certificateService';
+import { calculateCourseGrade } from '../services/gradingService';
 import { CertificateEvidence } from './CertificateEvidence';
 import { Award, Lock, Unlock, CheckCircle, AlertCircle, Eye, ShieldCheck } from 'lucide-react';
 
@@ -130,6 +131,7 @@ export const CertificationsView: React.FC<CertificationsViewProps> = ({
       {selectedCert && (
         <CertificateEvidence
           certificate={selectedCert}
+          grade={calculateCourseGrade(selectedCert.courseId, learnerProgress)}
           onClose={() => setSelectedCert(null)}
         />
       )}

@@ -1,5 +1,6 @@
 import { LearnerProgress } from '../types/academy';
 import { COURSES } from '../data/courses';
+import { LESSONS } from '../data/lessons';
 
 export interface CourseGradeSummary {
   courseId: string;
@@ -17,26 +18,32 @@ export const calculateCourseGrade = (courseId: string, progress: LearnerProgress
   const course = COURSES.find(c => c.id === courseId);
   const title = course ? course.title : "Course";
 
-  // Calculate Quiz Average for course
+  // Quiz average: best attempt per question, averaged across attempted questions
   const courseQuizzes = progress.quizAttempts.filter(q => q.courseId === courseId);
-  const quizAverage = courseQuizzes.length > 0
-    ? Math.round(courseQuizzes.reduce((sum, q) => sum + q.score, 0) / courseQuizzes.length)
+  const bestByQuestion = new Map<string, number>();
+  courseQuizzes.forEach(a => {
+    const prev = bestByQuestion.get(a.quizId) ?? 0;
+    if (a.score >= prev) bestByQuestion.set(a.quizId, a.score);
+  });
+  const quizScores = [...bestByQuestion.values()];
+  const quizAverage = quizScores.length > 0
+    ? Math.round(quizScores.reduce((sum, s) => sum + s, 0) / quizScores.length)
     : 0;
 
-  // Calculate Lab Average for course
+  // Lab average: latest submission per lab
   const courseLabs = progress.labSubmissions.filter(l => l.courseId === courseId);
   const labAverage = courseLabs.length > 0
     ? Math.round(courseLabs.reduce((sum, l) => sum + (l.score || 0), 0) / courseLabs.length)
     : 0;
 
-  // Final Project Score
+  // Final project score
   const projectSub = progress.projectSubmissions.find(p => p.courseId === courseId);
   const finalProjectScore = projectSub && projectSub.score ? projectSub.score : 0;
 
-  // Weighted calculation: 30% Quizzes, 40% Labs, 30% Final Project
+  // Weighted: 30% quizzes, 40% labs, 30% final project
   const finalScore = Math.round((quizAverage * 0.30) + (labAverage * 0.40) + (finalProjectScore * 0.30));
 
-  let letterGrade: 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'C' | 'Needs Improvement' = 'Needs Improvement';
+  let letterGrade: CourseGradeSummary['letterGrade'] = 'Needs Improvement';
   if (finalScore >= 95) letterGrade = 'A+';
   else if (finalScore >= 90) letterGrade = 'A';
   else if (finalScore >= 85) letterGrade = 'A-';
@@ -46,10 +53,12 @@ export const calculateCourseGrade = (courseId: string, progress: LearnerProgress
 
   const isPassed = finalScore >= 75;
 
-  // Calculate Lesson Completion %
-  const totalCourseLessons = 21; // ~3 lessons * 7 modules average
-  const completedCourseLessons = progress.completedLessonIds.filter(id => id.startsWith(`les-${courseId.replace('course-', '')}`)).length;
-  const completionPercent = Math.min(100, Math.round((completedCourseLessons / (totalCourseLessons || 1)) * 100));
+  // Lesson completion % against the actual curriculum
+  const courseLessonIds = LESSONS.filter(l => l.courseId === courseId).map(l => l.id);
+  const completedCourseLessons = progress.completedLessonIds.filter(id => courseLessonIds.includes(id)).length;
+  const completionPercent = courseLessonIds.length > 0
+    ? Math.min(100, Math.round((completedCourseLessons / courseLessonIds.length) * 100))
+    : 0;
 
   return {
     courseId,
