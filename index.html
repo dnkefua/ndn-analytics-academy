@@ -6,8 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NDN Analytics Inc. — Academy App</title>
     <meta name="description" content="NDN Analytics Inc. Academy App by MSc Desmond Nkefua. Master AI Engineering, Google Cloud Platform (GCP) Architecture, Firebase, and Google Play Store App Development." />
+    
+    <!-- Google Fonts: Outfit, Plus Jakarta Sans, Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS Script Fallback -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'deep-void': '#020617',
+              'neon-cyan': '#06b6d4',
+              'circuit-line': '#1e293b',
+              'success-glimmer': '#10b981',
+              'warning-amber': '#f59e0b',
+              'surface-container': '#122131',
+              'surface-container-low': '#0d1c2d',
+              'surface-container-lowest': '#010f1f',
+              'surface-container-high': '#1c2b3c',
+              'secondary-container': '#6001d1',
+              'on-surface': '#d4e4fa',
+              'on-surface-variant': '#bcc9cd',
+              'primary': '#4cd7f6'
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              display: ['"Outfit"', 'sans-serif'],
+              mono: ['"Fira Code"', 'monospace']
+            }
+          }
+        }
+      }
+    </script>
   </head>
-  <body>
+  <body class="bg-[#020617] text-[#d4e4fa]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

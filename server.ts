@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import { createServer as createViteServer } from 'vite';
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ app.use(express.json());
 // API route for AI Mentor Chat (Gemini LLM / Fallback Intel Kernel)
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { message } = req.body;
     const msgLower = (message || '').toLowerCase();
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -74,14 +75,26 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Serve Vite production bundle in production mode
-const distPath = path.join(process.cwd(), 'dist');
-app.use(express.static(distPath));
+async function startServer() {
+  const isProd = process.env.NODE_ENV === 'production';
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
+  if (!isProd) {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa'
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
 
-app.listen(PORT, () => {
-  console.log(`[ NDN ACADEMY APP ] Production server running on http://localhost:${PORT}`);
-});
+  app.listen(PORT, () => {
+    console.log(`[ NDN ACADEMY APP ] Server running on http://localhost:${PORT}`);
+  });
+}
+
+startServer();
