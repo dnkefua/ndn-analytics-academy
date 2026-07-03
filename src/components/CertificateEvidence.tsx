@@ -7,6 +7,7 @@ import { Share2, Printer, X, ShieldCheck, Clock, Award, Layers } from 'lucide-re
 interface CertificateEvidenceProps {
   certificate: EarnedCertificate;
   grade?: CourseGradeSummary;
+  specimen?: boolean;
   onClose: () => void;
 }
 
@@ -142,10 +143,13 @@ const LEVEL_LABELS: Record<string, string> = {
 export const CertificateEvidence: React.FC<CertificateEvidenceProps> = ({
   certificate,
   grade,
+  specimen = false,
   onClose,
 }) => {
   const course = COURSES.find(c => c.id === certificate.courseId);
-  const honors = honorsFromGrade(grade);
+  const honors = specimen ? 'With Highest Distinction' : honorsFromGrade(grade);
+  const displayGrade = specimen ? 'A+' : (grade?.letterGrade ?? 'Pass');
+  const displayGradeSub = specimen ? 'illustrative sample' : (grade ? `${grade.finalScore}% weighted` : 'requirements met');
 
   const handlePrint = () => window.print();
 
@@ -203,6 +207,24 @@ export const CertificateEvidence: React.FC<CertificateEvidenceProps> = ({
           {/* Subtle radial glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[280px] rounded-full pointer-events-none"
             style={{ background: 'radial-gradient(ellipse, rgba(201,162,39,0.10), transparent 70%)' }} />
+
+          {/* Specimen ribbon */}
+          {specimen && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none overflow-hidden">
+              <span
+                className="font-display font-extrabold uppercase whitespace-nowrap select-none"
+                style={{
+                  transform: 'rotate(-24deg)',
+                  fontSize: 'clamp(3rem, 9vw, 7rem)',
+                  letterSpacing: '0.25em',
+                  color: 'rgba(201,162,39,0.16)',
+                  textShadow: '0 0 1px rgba(201,162,39,0.25)',
+                }}
+              >
+                Specimen
+              </span>
+            </div>
+          )}
 
           <div className="relative z-10 px-10 sm:px-16 py-12 space-y-7 text-center">
             {/* Letterhead */}
@@ -271,8 +293,8 @@ export const CertificateEvidence: React.FC<CertificateEvidenceProps> = ({
               </div>
               <div className="space-y-1">
                 <span className="flex items-center justify-center text-[9px] uppercase tracking-[0.2em] text-slate-500"><Award className="w-3 h-3 mr-1" />Final Grade</span>
-                <span className="block text-sm font-bold" style={{ color: '#f3d97a' }}>{grade?.letterGrade ?? 'Pass'}</span>
-                <span className="block text-[9px] text-slate-500">{grade ? `${grade.finalScore}% weighted` : 'requirements met'}</span>
+                <span className="block text-sm font-bold" style={{ color: '#f3d97a' }}>{displayGrade}</span>
+                <span className="block text-[9px] text-slate-500">{displayGradeSub}</span>
               </div>
               <div className="space-y-1">
                 <span className="flex items-center justify-center text-[9px] uppercase tracking-[0.2em] text-slate-500"><ShieldCheck className="w-3 h-3 mr-1" />Issued</span>
@@ -317,8 +339,9 @@ export const CertificateEvidence: React.FC<CertificateEvidenceProps> = ({
 
             {/* Footer strip */}
             <p className="text-[8.5px] text-slate-500 tracking-wide pt-1">
-              Credential {certificate.id} • This certificate attests to independently assessed practical competency.
-              Authenticity is verifiable against the NDN Analytics credential registry using the verification ID above.
+              {specimen
+                ? 'SPECIMEN PREVIEW — this is an illustrative sample, not an awarded credential. Complete all course requirements to earn the verifiable certificate.'
+                : `Credential ${certificate.id} • This certificate attests to independently assessed practical competency. Authenticity is verifiable against the NDN Analytics credential registry using the verification ID above.`}
             </p>
           </div>
         </div>
@@ -335,16 +358,22 @@ export const CertificateEvidence: React.FC<CertificateEvidenceProps> = ({
 
           <div className="flex items-center space-x-3">
             <span className="text-[10px] text-slate-500 hidden sm:block">Tip: use landscape orientation when saving</span>
-            <a
-              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://ndnanalytics.com")}&summary=${encodeURIComponent(shareText)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-5 py-2.5 rounded-xl text-slate-950 text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer shadow-md"
-              style={{ background: 'linear-gradient(135deg, #f3d97a, #c9a227)' }}
-            >
-              <Share2 className="w-4 h-4" />
-              <span>Share on LinkedIn</span>
-            </a>
+            {specimen ? (
+              <span className="px-5 py-2.5 rounded-xl text-xs font-bold border border-amber-500/40 text-amber-300 bg-amber-500/10">
+                Sample Preview — earn the course to share
+              </span>
+            ) : (
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://ndnanalytics.com")}&summary=${encodeURIComponent(shareText)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 rounded-xl text-slate-950 text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer shadow-md"
+                style={{ background: 'linear-gradient(135deg, #f3d97a, #c9a227)' }}
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share on LinkedIn</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

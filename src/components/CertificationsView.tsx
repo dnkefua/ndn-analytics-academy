@@ -14,6 +14,7 @@ export const CertificationsView: React.FC<CertificationsViewProps> = ({
   learnerProgress,
 }) => {
   const [selectedCert, setSelectedCert] = useState<EarnedCertificate | null>(null);
+  const [specimenCert, setSpecimenCert] = useState<EarnedCertificate | null>(null);
 
   return (
     <div className="space-y-8 animate-fade-in text-slate-100 pb-16">
@@ -122,6 +123,23 @@ export const CertificationsView: React.FC<CertificationsViewProps> = ({
                   </ul>
                 </div>
               )}
+
+              {/* Sample preview — always available */}
+              <button
+                onClick={() => setSpecimenCert({
+                  id: `SPECIMEN-${course.code}`,
+                  courseId: course.id,
+                  title: course.title,
+                  recipientName: learnerProgress.studentName,
+                  issueDate: new Date().toISOString().split('T')[0],
+                  verificationId: `NDN-SPECIMEN-${course.code}`,
+                  cpdCredits: course.cpdCredits,
+                })}
+                className="w-full py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-300/90 hover:text-amber-200 font-semibold text-[11px] border border-amber-500/25 hover:border-amber-500/50 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Preview Sample Certificate</span>
+              </button>
             </div>
           );
         })}
@@ -133,6 +151,15 @@ export const CertificationsView: React.FC<CertificationsViewProps> = ({
           certificate={selectedCert}
           grade={calculateCourseGrade(selectedCert.courseId, learnerProgress)}
           onClose={() => setSelectedCert(null)}
+        />
+      )}
+
+      {/* Specimen Preview Modal */}
+      {specimenCert && (
+        <CertificateEvidence
+          certificate={specimenCert}
+          specimen
+          onClose={() => setSpecimenCert(null)}
         />
       )}
     </div>
