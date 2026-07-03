@@ -38,6 +38,11 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: VITE_FIREBASE_API_KEY
+    secret: firebaseApiKey
+    availability:
+      - BUILD
+      - RUNTIME
   - variable: GEMINI_API_KEY
     secret: geminiApiKey
     availability:
