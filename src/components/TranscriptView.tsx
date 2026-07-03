@@ -1,202 +1,127 @@
-import React, { useState } from 'react';
-import { TranscriptRecord } from '../types';
+import React from 'react';
+import { LearnerProgress } from '../types/academy';
+import { COURSES } from '../data/courses';
+import { calculateCourseGrade, calculateGPA } from '../services/gradingService';
+import { FileText, Award, ShieldCheck, Printer, CheckCircle } from 'lucide-react';
 
 interface TranscriptViewProps {
-  transcript: TranscriptRecord;
+  learnerProgress: LearnerProgress;
 }
 
-export default function TranscriptView({ transcript }: TranscriptViewProps) {
-  const [filterCategory, setFilterCategory] = useState<string>('ALL');
+export const TranscriptView: React.FC<TranscriptViewProps> = ({
+  learnerProgress,
+}) => {
+  const gradeSummaries = COURSES.map(c => calculateCourseGrade(c.id, learnerProgress));
+  const gpa = calculateGPA(gradeSummaries);
 
-  const filteredGrades = transcript.grades.filter((g) => {
-    if (filterCategory === 'ALL') return true;
-    return g.category === filterCategory;
-  });
+  const totalCPDEarned = COURSES.reduce((sum, c) => {
+    const summary = gradeSummaries.find(s => s.courseId === c.id);
+    return sum + (summary && summary.isPassed ? c.cpdCredits : 0);
+  }, 0);
 
   const handlePrint = () => {
     window.print();
   };
 
   return (
-    <div className="space-y-8 pb-12 font-mono">
-      {/* Printable CSS styles */}
-      <style>{`
-        @media print {
-          body { background: #ffffff !important; color: #000000 !important; }
-          header, nav, footer, button, .no-print { display: none !important; }
-          .print-container { padding: 0 !important; margin: 0 !important; width: 100% !important; background: #fff !important; color: #000 !important; }
-          .print-border { border: 2px solid #000 !important; color: #000 !important; background: #fff !important; }
-          .print-text-black { color: #000000 !important; }
-        }
-      `}</style>
-
-      {/* Top Banner & Print Action */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-neon-cyan pl-6 no-print">
-        <div>
-          <span className="text-[10px] font-bold text-neon-cyan tracking-widest uppercase mb-1 block">
-            [ ACADEMIC_RECORDS // VERIFIED ]
-          </span>
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Grades & Official Transcript
-          </h1>
-          <p className="text-xs text-on-surface-variant max-w-xl mt-1">
-            Official academic record of completed courses, practical lab benchmarks, cumulative GPA, and CPD credits at NDN Analytics Inc. Academy.
-          </p>
-        </div>
-
-        <button
-          onClick={handlePrint}
-          className="px-6 py-3 bg-neon-cyan text-deep-void font-bold text-xs border border-neon-cyan hover:bg-transparent hover:text-neon-cyan transition-all flex items-center justify-center gap-2 cursor-pointer uppercase rounded-lg"
-        >
-          <span className="material-symbols-outlined text-sm">print</span>
-          PRINT / EXPORT TRANSCRIPT
-        </button>
-      </div>
-
-      {/* Transcript Document Outer Wrapper */}
-      <div className="print-container glass-card rounded-xl border border-circuit-line p-6 md:p-10 relative overflow-hidden bg-surface-container-low">
-        
-        {/* Document Header Seal */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-neon-cyan pb-8 mb-8 gap-6 print-border">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <img src="/ndn_3d_logo.png" alt="NDN 3D Logo" className="w-12 h-12 object-contain rounded-xl border border-neon-cyan/80 shadow-[0_0_15px_rgba(6,182,212,0.4)]" />
-              <div>
-                <h2 className="font-display text-2xl font-black text-white tracking-tight uppercase print-text-black">
-                  NDN ANALYTICS INC. ACADEMY
-                </h2>
-                <p className="text-[10px] text-neon-cyan font-bold tracking-widest">
-                  OFFICIAL REGISTRAR & ACADEMIC CREDENTIALS OFFICE
-                </p>
-              </div>
+    <div className="space-y-8 animate-fade-in text-slate-100 pb-16">
+      {/* Header */}
+      <div className="relative rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 p-8 overflow-hidden shadow-xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-wrap justify-between items-center gap-4">
+          <div className="space-y-3">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              <FileText className="w-3.5 h-3.5" />
+              <span>Official Academic Record</span>
             </div>
-            <p className="text-xs text-on-surface-variant max-w-md">
-              Verification Portal: <a href="https://www.ndnanalytics.com/" target="_blank" rel="noreferrer" className="text-neon-cyan underline">www.ndnanalytics.com</a>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-display text-white">
+              Academic Transcript
+            </h1>
+            <p className="text-sm text-slate-300">
+              Derived live from verified quiz scores, practical lab evaluations, and capstone project submissions.
             </p>
           </div>
 
-          {/* Verification Badge */}
-          <div className="border border-neon-cyan p-4 rounded-lg bg-surface-container/80 text-right space-y-1">
-            <p className="text-[9px] font-bold text-neon-cyan tracking-widest uppercase">STATUS: OFFICIALLY VERIFIED</p>
-            <p className="text-xs font-bold text-white font-mono">{transcript.verificationHash}</p>
-            <p className="text-[9px] text-on-surface-variant">ISSUED BY MSc Desmond Nkefua, ACADEMIC DIRECTOR</p>
-          </div>
+          <button
+            onClick={handlePrint}
+            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer border border-slate-700"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Print Official Transcript</span>
+          </button>
         </div>
+      </div>
 
-        {/* Student Stats Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-surface-container p-4 border border-circuit-line rounded-lg">
-            <p className="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Student Name</p>
-            <p className="text-sm font-bold text-white mt-1">{transcript.studentName}</p>
-            <p className="text-[9px] text-neon-cyan mt-0.5">ID: {transcript.studentId}</p>
-          </div>
-
-          <div className="bg-surface-container p-4 border border-circuit-line rounded-lg">
-            <p className="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Cumulative GPA</p>
-            <p className="text-2xl font-black text-neon-cyan mt-1">{transcript.gpa.toFixed(2)} <span className="text-xs text-on-surface-variant font-normal">/ 4.00</span></p>
-            <p className="text-[9px] text-success-glimmer mt-0.5">[ SUMMA CUM LAUDE ]</p>
-          </div>
-
-          <div className="bg-surface-container p-4 border border-circuit-line rounded-lg">
-            <p className="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">CPD Credits Earned</p>
-            <p className="text-2xl font-black text-primary mt-1">{transcript.cpdPoints} <span className="text-xs font-normal text-on-surface-variant">CPD</span></p>
-            <p className="text-[9px] text-on-surface-variant mt-0.5">50 Academic Credits</p>
-          </div>
-
-          <div className="bg-surface-container p-4 border border-circuit-line rounded-lg">
-            <p className="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Enrollment Date</p>
-            <p className="text-xs font-bold text-white mt-2">{transcript.enrollmentDate}</p>
-            <p className="text-[9px] text-success-glimmer mt-0.5">ACTIVE SENIOR FELLOW</p>
-          </div>
+      {/* Learner Profile Overview Card */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-4 gap-6 shadow-xl text-xs">
+        <div>
+          <span className="text-slate-500 block uppercase tracking-wider text-[10px]">Student Name</span>
+          <span className="text-base font-bold text-white font-display">{learnerProgress.studentName}</span>
         </div>
-
-        {/* Filter Controls (No Print) */}
-        <div className="flex items-center justify-between gap-4 mb-4 no-print">
-          <h3 className="text-xs font-bold text-neon-cyan tracking-widest uppercase">
-            COURSE_GRADE_LOG [ {filteredGrades.length} RECORDS ]
-          </h3>
-          <div className="flex gap-2 text-xs">
-            {['ALL', 'Firebase & GCP', 'AI Engineering', 'GCP Architecture', 'Google App Store', 'BigData MLOps'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`px-3 py-1 text-[10px] font-bold border rounded cursor-pointer transition-all ${
-                  filterCategory === cat
-                    ? 'bg-neon-cyan text-deep-void border-neon-cyan'
-                    : 'bg-surface-container text-on-surface-variant border-circuit-line hover:border-neon-cyan'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        <div>
+          <span className="text-slate-500 block uppercase tracking-wider text-[10px]">Student ID</span>
+          <span className="text-base font-mono font-bold text-cyan-400">{learnerProgress.studentId}</span>
         </div>
+        <div>
+          <span className="text-slate-500 block uppercase tracking-wider text-[10px]">Cumulative GPA</span>
+          <span className="text-base font-bold text-emerald-400">{gpa} / 4.0</span>
+        </div>
+        <div>
+          <span className="text-slate-500 block uppercase tracking-wider text-[10px]">Total CPD Earned</span>
+          <span className="text-base font-bold text-amber-400">{totalCPDEarned} Credits</span>
+        </div>
+      </div>
 
-        {/* Official Grades Table */}
-        <div className="overflow-x-auto border border-circuit-line rounded-lg mb-8">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-surface-container border-b border-circuit-line text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
-              <tr>
-                <th className="p-4">Code</th>
-                <th className="p-4">Course Title & Specialty</th>
-                <th className="p-4 text-center">Credits</th>
-                <th className="p-4 text-center">Quiz %</th>
-                <th className="p-4 text-center">Practical Lab %</th>
-                <th className="p-4 text-center">Grade</th>
-                <th className="p-4 text-right">Term</th>
+      {/* Course Grades Breakdown Table */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <h3 className="text-xl font-bold text-white font-display">Course Evaluations & Final Grades</h3>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-800 text-xs uppercase text-slate-400 bg-slate-950/60">
+                <th className="py-3 px-4">Course Code & Title</th>
+                <th className="py-3 px-4">Quiz Avg</th>
+                <th className="py-3 px-4">Lab Avg</th>
+                <th className="py-3 px-4">Capstone</th>
+                <th className="py-3 px-4">Final Score</th>
+                <th className="py-3 px-4">Grade</th>
+                <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-circuit-line bg-surface-container-lowest/50">
-              {filteredGrades.map((grade) => (
-                <tr key={grade.id} className="hover:bg-neon-cyan/5 transition-colors">
-                  <td className="p-4 font-bold text-neon-cyan">{grade.courseCode}</td>
-                  <td className="p-4">
-                    <p className="font-bold text-white">{grade.courseTitle}</p>
-                    <p className="text-[10px] text-on-surface-variant">{grade.category}</p>
-                  </td>
-                  <td className="p-4 text-center font-bold text-on-surface">{grade.credits}</td>
-                  <td className="p-4 text-center text-on-surface">{grade.quizScore}%</td>
-                  <td className="p-4 text-center text-on-surface">{grade.labScore}%</td>
-                  <td className="p-4 text-center font-black">
-                    <span className={`px-3 py-1 rounded text-xs inline-block ${
-                      grade.finalGrade.startsWith('A')
-                        ? 'bg-success-glimmer/20 text-success-glimmer border border-success-glimmer/40'
-                        : 'bg-warning-amber/20 text-warning-amber border border-warning-amber/40'
-                    }`}>
-                      {grade.finalGrade}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right text-on-surface-variant font-bold">{grade.term}</td>
-                </tr>
-              ))}
+            <tbody className="divide-y divide-slate-800 text-xs">
+              {gradeSummaries.map((summary) => {
+                const course = COURSES.find(c => c.id === summary.courseId);
+
+                return (
+                  <tr key={summary.courseId} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3.5 px-4 font-semibold text-slate-200">
+                      <span className="text-cyan-400 font-mono text-[11px] block">{course?.code}</span>
+                      <span>{summary.courseTitle}</span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-300">{summary.quizAverage}%</td>
+                    <td className="py-3.5 px-4 text-slate-300">{summary.labAverage}%</td>
+                    <td className="py-3.5 px-4 text-slate-300">{summary.finalProjectScore}%</td>
+                    <td className="py-3.5 px-4 font-bold text-white">{summary.finalScore}%</td>
+                    <td className="py-3.5 px-4 font-bold text-cyan-400">{summary.letterGrade}</td>
+                    <td className="py-3.5 px-4">
+                      {summary.isPassed ? (
+                        <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          PASSED
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-slate-800 text-slate-400">
+                          IN PROGRESS
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-
-        {/* Official Registrar Seal & Signatures Footer */}
-        <div className="border-t-2 border-circuit-line pt-8 flex flex-col sm:flex-row justify-between items-end gap-6">
-          <div className="space-y-2">
-            <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">OFFICIAL ACADEMIC STAMP</p>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 border-2 border-neon-cyan rounded-full flex items-center justify-center text-neon-cyan p-1 text-center shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                <span className="text-[8px] font-extrabold leading-tight uppercase">NDN ANALYTICS INC. SEAL</span>
-              </div>
-              <div className="text-xs">
-                <p className="font-bold text-white">MSc Desmond Nkefua</p>
-                <p className="text-[10px] text-neon-cyan">Academic Director & Founder</p>
-                <p className="text-[9px] text-on-surface-variant">NDN Analytics Inc. (ndnanalytics.com)</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-right text-[10px] text-on-surface-variant space-y-1">
-            <p>Verification Code: <strong className="text-neon-cyan">NDN-2026-VAL-988</strong></p>
-            <p>Cryptographic Sign: 0x8F9a...2B01 (SHA-256)</p>
-            <p>© NDN Analytics Inc. All Academic Rights Reserved.</p>
-          </div>
-        </div>
-
       </div>
     </div>
   );
-}
+};

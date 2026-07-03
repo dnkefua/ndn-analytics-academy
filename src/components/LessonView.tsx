@@ -1,440 +1,259 @@
 import React, { useState } from 'react';
-import { Lesson } from '../types';
+import { Course, Module, Lesson, Lab, LearnerProgress } from '../types/academy';
+import { COURSES } from '../data/courses';
+import { MODULES } from '../data/modules';
+import { LESSONS } from '../data/lessons';
+import { LABS } from '../data/labs';
+import { LabStudio } from './LabStudio';
+import { ArrowLeft, ArrowRight, CheckCircle, Play, BookOpen, Terminal, HelpCircle, FileText, Download, Award, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface LessonViewProps {
-  lesson: Lesson;
-  onTakeQuiz: () => void;
+  courseId: string;
+  learnerProgress: LearnerProgress;
+  onMarkLessonComplete: (lessonId: string) => void;
+  onSaveLabSubmission: (submission: any) => void;
+  onOpenQuiz: (quizId: string) => void;
+  onBackToCatalog: () => void;
 }
 
-export default function LessonView({ lesson, onTakeQuiz }: LessonViewProps) {
-  const [activeTab, setActiveTab] = useState<'notes' | 'resources' | 'deployment'>('notes');
-  const [terminalLang, setTerminalLang] = useState<'python' | 'kotlin' | 'gcloud'>('python');
-  
-  const codePresets = {
-    python: `# NDN Analytics AI Engineering Studio (Python)
-from google.genai import GoogleGenAI
+export const LessonView: React.FC<LessonViewProps> = ({
+  courseId,
+  learnerProgress,
+  onMarkLessonComplete,
+  onSaveLabSubmission,
+  onOpenQuiz,
+  onBackToCatalog,
+}) => {
+  const course = COURSES.find(c => c.id === courseId) || COURSES[0];
+  const courseModules = MODULES.filter(m => m.courseId === course.id);
+  const courseLessons = LESSONS.filter(l => l.courseId === course.id);
 
-# Initialize Gemini 3.5 Agent
-ai = GoogleGenAI(api_key="NDN_ACADEMY_ENV_KEY")
-prompt = "Build a GCP Cloud Run deployment check script"
+  const [activeModuleId, setActiveModuleId] = useState<string>(courseModules[0]?.id || "");
+  const [activeLessonId, setActiveLessonId] = useState<string>(courseLessons[0]?.id || "");
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
-response = ai.models.generate_content(
-    model="gemini-3.5-flash",
-    contents=prompt
-)
-print("[ SUCCESS ] Agent Response Received:", response.text[:50])`,
-    kotlin: `// NDN Analytics Google Play Store Dev Studio (Kotlin)
-package com.ndnanalytics.academy
+  const activeLesson = courseLessons.find(l => l.id === activeLessonId) || courseLessons[0] || LESSONS[0];
+  const activeModule = courseModules.find(m => m.id === activeLesson.moduleId) || courseModules[0];
+  const currentLab = LABS.find(l => l.moduleId === activeModule?.id);
 
-import com.google.android.play.core.integrity.IntegrityManagerFactory
+  const isCompleted = learnerProgress.completedLessonIds.includes(activeLesson.id);
 
-class PlayIntegrityCheck(private val context: Context) {
-    fun verifyAppIntegrity() {
-        val integrityManager = IntegrityManagerFactory.create(context)
-        println("[ STATUS ] Requesting Google Play Integrity Token...")
-    }
-}`,
-    gcloud: `# NDN Analytics GCP Cloud Architecture Terminal (gcloud CLI)
-# 1. Containerize application with Google Artifact Registry
-gcloud builds submit --tag gcr.io/ndn-analytics/app:v1
-
-# 2. Deploy container to serverless GCP Cloud Run
-gcloud run deploy ndn-app-service \\
-  --image gcr.io/ndn-analytics/app:v1 \\
-  --platform managed \\
-  --region us-central1 \\
-  --allow-unauthenticated`
-  };
-
-  const [codeContent, setCodeContent] = useState<string>(codePresets.python);
-  const [isTerminalRunning, setIsTerminalRunning] = useState(false);
-  const [terminalLogs, setTerminalLogs] = useState<string[]>([lesson.terminalOutput]);
-  const [tasks, setTasks] = useState(lesson.practicalTasks);
-  const [isDeploying, setIsDeploying] = useState(false);
-  const [deploymentProgress, setDeploymentProgress] = useState(0);
-
-  const handleLanguageChange = (lang: 'python' | 'kotlin' | 'gcloud') => {
-    setTerminalLang(lang);
-    setCodeContent(codePresets[lang]);
-    setTerminalLogs([`Switched environment to ${lang.toUpperCase()} Studio.`]);
-  };
-
-  const simulateRunTerminal = () => {
-    setIsTerminalRunning(true);
-    setTerminalLogs([`[ INITIALIZING ] Launching ${terminalLang.toUpperCase()} Runtime...`]);
-
-    setTimeout(() => {
-      setTerminalLogs((prev) => [
-        ...prev,
-        `[ STEP 1/2 ] Verifying NDN Analytics API uplink...`,
-      ]);
-    }, 600);
-
-    setTimeout(() => {
-      setIsTerminalRunning(false);
-      setTerminalLogs((prev) => [
-        ...prev,
-        `[ SUCCESS ] Execution complete. Latency: 12ms. All practical benchmarks passed!`,
-      ]);
-
-      setTasks((prevTasks) => {
-        const next = [...prevTasks];
-        const uncompletedIdx = next.findIndex((t) => !t.completed);
-        if (uncompletedIdx !== -1) {
-          next[uncompletedIdx].completed = true;
-        }
-        return next;
-      });
-    }, 1500);
-  };
-
-  const simulateDeployment = () => {
-    if (isDeploying) return;
-    setIsDeploying(true);
-    setDeploymentProgress(0);
-    const interval = setInterval(() => {
-      setDeploymentProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setIsDeploying(false), 1000);
-          return 100;
-        }
-        return prev + 15;
-      });
-    }, 300);
-  };
+  const activeIndex = courseLessons.findIndex(l => l.id === activeLesson.id);
+  const prevLesson = activeIndex > 0 ? courseLessons[activeIndex - 1] : null;
+  const nextLesson = activeIndex < courseLessons.length - 1 ? courseLessons[activeIndex + 1] : null;
 
   return (
-    <div className="space-y-8 font-mono pb-12">
-      {/* Breadcrumbs and Progress Header */}
-      <div className="space-y-4">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-neon-cyan font-mono text-xs font-bold">[ {lesson.moduleId} ]</span>
-              <span className="text-on-surface-variant font-mono text-xs">/</span>
-              <span className="text-on-surface-variant font-mono text-xs">{lesson.moduleName}</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-on-surface leading-tight">
-              {lesson.title}
-            </h2>
-          </div>
-          <div className="flex items-center gap-4 text-on-surface-variant">
-            <span className="font-mono text-[10px] font-bold tracking-wider">PRACTICAL LAB PROGRESS [ {lesson.progress}% ]</span>
-            <div className="w-48 h-2.5 bg-surface-container rounded-full overflow-hidden border border-circuit-line p-0.5">
-              <div
-                className="h-full bg-neon-cyan shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-1000"
-                style={{ width: `${lesson.progress}%` }}
-              ></div>
-            </div>
-          </div>
+    <div className="space-y-6 animate-fade-in text-slate-100 pb-16">
+      {/* Top Breadcrumb & Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+        <div className="flex items-center space-x-3 text-xs">
+          <button onClick={onBackToCatalog} className="text-slate-400 hover:text-cyan-400 font-medium cursor-pointer">
+            Catalog
+          </button>
+          <span className="text-slate-600">/</span>
+          <span className="text-cyan-400 font-semibold">{course.title}</span>
+          <span className="text-slate-600">/</span>
+          <span className="text-white font-bold">{activeModule?.title}</span>
         </div>
-        <div className="h-px bg-circuit-line w-full"></div>
+
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-300 hover:text-cyan-400 cursor-pointer"
+        >
+          {sidebarOpen ? "Hide Module Syllabus Sidebar" : "Show Module Syllabus Sidebar"}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Video & Code Practical Terminal */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Video Player Module */}
-          <div className="relative aspect-video bg-surface-container-low border border-circuit-line group overflow-hidden rounded-lg">
-            <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <button className="w-20 h-20 rounded-full border-2 border-neon-cyan bg-neon-cyan/10 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
-                <span className="material-symbols-outlined text-neon-cyan text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  play_arrow
-                </span>
-              </button>
-            </div>
-            <div className="absolute top-4 right-4 z-20 flex gap-2">
-              <span className="bg-deep-void/80 border border-neon-cyan/30 text-neon-cyan px-3 py-1 font-mono text-[10px] font-bold tracking-wider rounded backdrop-blur-md">
-                NDN_VIDEO_LECTURE
-              </span>
-              <span className="bg-deep-void/80 border border-circuit-line text-on-surface-variant px-3 py-1 font-mono text-[10px] font-bold tracking-wider rounded backdrop-blur-md">
-                HD 1080P
-              </span>
-            </div>
-            <img
-              className="w-full h-full object-cover"
-              src={lesson.videoPoster}
-              alt="Lecture poster"
-            />
-          </div>
-
-          {/* Interactive Practical Code Studio */}
-          <div className="bg-surface-container-lowest border border-circuit-line rounded-lg overflow-hidden shadow-2xl">
-            {/* Studio Header & Language Switcher */}
-            <div className="bg-surface-container px-4 py-3 border-b border-circuit-line flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div className="flex items-center gap-4">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-error/40"></div>
-                  <div className="w-3 h-3 rounded-full bg-warning-amber/40"></div>
-                  <div className="w-3 h-3 rounded-full bg-success-glimmer/40"></div>
-                </div>
-                <span className="font-mono text-[10px] text-neon-cyan font-bold tracking-wide">
-                  PRACTICAL_LAB_STUDIO // {terminalLang.toUpperCase()}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {(['python', 'kotlin', 'gcloud'] as const).map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => handleLanguageChange(lang)}
-                    className={`px-3 py-1 text-[9px] font-bold uppercase rounded border transition-all cursor-pointer ${
-                      terminalLang === lang
-                        ? 'bg-neon-cyan text-deep-void border-neon-cyan'
-                        : 'bg-surface-container-lowest text-on-surface-variant border-circuit-line hover:border-neon-cyan'
-                    }`}
-                  >
-                    {lang}
-                  </button>
-                ))}
-
-                <button
-                  onClick={simulateRunTerminal}
-                  disabled={isTerminalRunning}
-                  className="bg-neon-cyan hover:bg-transparent hover:text-neon-cyan text-deep-void border border-neon-cyan px-4 py-1 font-mono text-[10px] font-bold tracking-widest disabled:opacity-50 cursor-pointer transition-all flex items-center gap-1.5"
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    {isTerminalRunning ? 'pending' : 'play_circle'}
-                  </span>
-                  {isTerminalRunning ? 'EXECUTING...' : 'RUN CODE'}
-                </button>
-              </div>
-            </div>
-
-            {/* Code Editor TextArea */}
-            <div className="p-4 bg-[#010816] text-on-surface font-mono text-xs">
-              <textarea
-                value={codeContent}
-                onChange={(e) => setCodeContent(e.target.value)}
-                rows={10}
-                className="w-full bg-transparent text-neon-cyan font-mono text-xs outline-none resize-none leading-relaxed border-none"
-                spellCheck={false}
-              />
-            </div>
-
-            {/* Output Logs Console */}
-            <div className="bg-surface-container-high p-4 border-t border-circuit-line space-y-2">
-              <div className="flex items-center justify-between text-[10px] font-bold text-on-surface-variant">
-                <span>SYSTEM CONSOLE LOGS</span>
-                <span className="text-neon-cyan">[ STDOUT ]</span>
-              </div>
-              <div className="space-y-1 text-xs text-on-surface font-mono max-h-32 overflow-y-auto">
-                {terminalLogs.map((log, i) => (
-                  <p key={i} className={log.includes('SUCCESS') ? 'text-success-glimmer' : 'text-on-surface-variant'}>
-                    {log}
-                  </p>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Practical Checklist */}
-          <div className="bg-surface-container border border-circuit-line p-6 rounded-lg space-y-4 font-mono">
-            <h3 className="text-xs font-bold text-neon-cyan tracking-widest uppercase flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">checklist</span>
-              PRACTICAL OBJECTIVES CHECKLIST
+      {/* Main Grid: Syllabus Sidebar + Lesson Player */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        {/* Sidebar */}
+        {sidebarOpen && (
+          <div className="lg:col-span-1 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-4 shadow-xl">
+            <h3 className="text-sm font-bold text-white font-display border-b border-slate-800 pb-3 flex items-center justify-between">
+              <span>Course Syllabus</span>
+              <span className="text-xs font-normal text-slate-400">{courseModules.length} Modules</span>
             </h3>
-            <div className="space-y-3">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() => {
-                    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t));
-                  }}
-                  className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer transition-all ${
-                    task.completed
-                      ? 'bg-success-glimmer/10 border-success-glimmer/40 text-success-glimmer'
-                      : 'bg-surface-container-low border-circuit-line text-on-surface-variant hover:border-neon-cyan'
-                  }`}
-                >
-                  <span className="text-xs font-mono">{task.title}</span>
-                  <span className="material-symbols-outlined text-sm">
-                    {task.completed ? 'check_box' : 'checkbox_outline_blank'}
-                  </span>
-                </div>
-              ))}
+
+            <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+              {courseModules.map((mod) => {
+                const modLessons = courseLessons.filter(l => l.moduleId === mod.id);
+                const modLab = LABS.find(l => l.moduleId === mod.id);
+
+                return (
+                  <div key={mod.id} className="space-y-1.5">
+                    <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider px-2 py-1 bg-slate-950/60 rounded-md border border-slate-800">
+                      Module {mod.order}: {mod.title}
+                    </div>
+
+                    <div className="pl-2 space-y-1">
+                      {modLessons.map((les) => {
+                        const done = learnerProgress.completedLessonIds.includes(les.id);
+                        const isCurrent = les.id === activeLesson.id;
+
+                        return (
+                          <button
+                            key={les.id}
+                            onClick={() => {
+                              setActiveLessonId(les.id);
+                              setActiveModuleId(mod.id);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-between cursor-pointer ${
+                              isCurrent
+                                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold'
+                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2 truncate">
+                              {done ? (
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                              )}
+                              <span className="truncate">{les.title}</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500">{les.durationMinutes}m</span>
+                          </button>
+                        );
+                      })}
+
+                      {/* Quiz Link */}
+                      {mod.quizIds && mod.quizIds.length > 0 && (
+                        <button
+                          onClick={() => onOpenQuiz(mod.quizIds[0])}
+                          className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-300 bg-indigo-950/30 border border-indigo-500/20 hover:border-indigo-500/40 transition-all flex items-center space-x-2 cursor-pointer"
+                        >
+                          <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>Module {mod.order} Evaluation Quiz</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Right Column: Tabs (Notes, Resources, Deployment) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-surface-container border border-circuit-line rounded-lg overflow-hidden flex flex-col min-h-[420px]">
-            <div className="flex border-b border-circuit-line font-mono">
+        {/* Lesson Body */}
+        <div className={sidebarOpen ? "lg:col-span-3 space-y-6" : "lg:col-span-4 space-y-6"}>
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+            {/* Header & Mark Complete */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                  {activeLesson.type.toUpperCase()} LESSON
+                </span>
+                <h1 className="text-2xl font-bold text-white font-display">{activeLesson.title}</h1>
+              </div>
+
               <button
-                onClick={() => setActiveTab('notes')}
-                className={`flex-1 py-4 text-[10px] font-bold tracking-wider transition-all cursor-pointer ${
-                  activeTab === 'notes'
-                    ? 'text-neon-cyan border-b-2 border-neon-cyan bg-primary-container/5'
-                    : 'text-on-surface-variant hover:text-neon-cyan'
+                onClick={() => onMarkLessonComplete(activeLesson.id)}
+                className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center space-x-2 cursor-pointer shadow-md ${
+                  isCompleted
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-gradient-to-r from-cyan-500 to-emerald-400 text-slate-950 hover:from-cyan-400 hover:to-emerald-300'
                 }`}
               >
-                NOTES
-              </button>
-              <button
-                onClick={() => setActiveTab('resources')}
-                className={`flex-1 py-4 text-[10px] font-bold tracking-wider transition-all cursor-pointer ${
-                  activeTab === 'resources'
-                    ? 'text-neon-cyan border-b-2 border-neon-cyan bg-primary-container/5'
-                    : 'text-on-surface-variant hover:text-neon-cyan'
-                }`}
-              >
-                RESOURCES
-              </button>
-              <button
-                onClick={() => setActiveTab('deployment')}
-                className={`flex-1 py-4 text-[10px] font-bold tracking-wider transition-all cursor-pointer ${
-                  activeTab === 'deployment'
-                    ? 'text-neon-cyan border-b-2 border-neon-cyan bg-primary-container/5'
-                    : 'text-on-surface-variant hover:text-neon-cyan'
-                }`}
-              >
-                GCP DEPLOY
+                <CheckCircle className="w-4 h-4" />
+                <span>{isCompleted ? "Completed ✓" : "Mark Lesson Complete"}</span>
               </button>
             </div>
 
-            <div className="p-6 flex-1 overflow-y-auto">
-              {activeTab === 'notes' && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="space-y-3">
-                    <h4 className="font-display text-base font-bold text-on-surface flex items-center gap-2">
-                      <span className="w-2 h-2 bg-neon-cyan rounded-full glow-cyan"></span>
-                      Core Concepts
-                    </h4>
-                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                      {lesson.notes.coreConcepts}
-                    </p>
-                  </div>
+            {/* Content: Video or Markdown Reading */}
+            {activeLesson.type === 'video' && activeLesson.videoUrl && (
+              <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+                <iframe
+                  src={activeLesson.videoUrl}
+                  title={activeLesson.title}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            )}
 
-                  <div className="p-4 bg-secondary-container/10 border border-secondary-container/30 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2 text-neon-cyan">
-                      <span className="material-symbols-outlined text-sm">lightbulb</span>
-                      <span className="font-mono text-[9px] font-bold uppercase tracking-widest">
-                        MSc DESMOND NKEFUA PRO-TIP
-                      </span>
-                    </div>
-                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                      {lesson.notes.proTip}
-                    </p>
-                  </div>
+            {activeLesson.readingMarkdown && (
+              <div className="prose prose-invert max-w-none bg-slate-950/60 p-6 rounded-xl border border-slate-800/80 text-sm text-slate-300 leading-relaxed">
+                <pre className="font-sans whitespace-pre-wrap leading-relaxed">{activeLesson.readingMarkdown}</pre>
+              </div>
+            )}
 
-                  <div className="space-y-3 font-mono">
-                    <h5 className="text-[10px] font-bold text-neon-cyan tracking-widest">KEY TERMS</h5>
-                    <ul className="space-y-2">
-                      {lesson.notes.keyTerms.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="material-symbols-outlined text-neon-cyan text-sm mt-0.5 select-none">
-                            arrow_right
-                          </span>
-                          <span className="text-xs text-on-surface-variant leading-relaxed">
-                            <strong className="text-on-surface font-bold">{item.term}:</strong> {item.definition}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+            {/* Embedded Practical Lab Studio if Type is Lab */}
+            {activeLesson.type === 'lab' && currentLab && (
+              <LabStudio
+                lab={currentLab}
+                existingSubmission={learnerProgress.labSubmissions.find(s => s.labId === currentLab.id)}
+                onSaveSubmission={onSaveLabSubmission}
+              />
+            )}
 
-                  <div className="pt-4 border-t border-circuit-line">
-                    <button
-                      onClick={onTakeQuiz}
-                      className="w-full py-3 bg-secondary-container hover:bg-secondary-container/80 text-white font-mono text-[10px] font-bold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer rounded-lg"
-                    >
-                      <span className="material-symbols-outlined text-sm">quiz</span>
-                      Take Knowledge Assessment
-                    </button>
-                  </div>
+            {/* Lesson Notes */}
+            {activeLesson.notes && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                  <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center space-x-1.5">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Core Engineering Concepts</span>
+                  </h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">{activeLesson.notes.coreConcepts}</p>
                 </div>
-              )}
 
-              {activeTab === 'resources' && (
-                <div className="space-y-4 animate-fadeIn font-mono">
-                  <h4 className="font-display text-base font-bold text-on-surface mb-4">Course Assets & Docs</h4>
-                  {lesson.resources.map((resource, index) => (
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                  <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+                    <Award className="w-3.5 h-3.5" />
+                    <span>NDN Engineering Pro-Tip</span>
+                  </h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">{activeLesson.notes.proTip}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Resources Link Bar */}
+            {activeLesson.resources && activeLesson.resources.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Technical Resources & References</h4>
+                <div className="flex flex-wrap gap-2">
+                  {activeLesson.resources.map((res, idx) => (
                     <a
-                      key={index}
-                      className="group block p-3 bg-surface-container-low border border-circuit-line hover:border-neon-cyan transition-all rounded-lg cursor-pointer"
-                      href={resource.url}
+                      key={idx}
+                      href={res.url}
                       target="_blank"
                       rel="noreferrer"
+                      className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-medium text-cyan-400 hover:text-cyan-300 hover:border-cyan-500/40 transition-all flex items-center space-x-1.5"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-neon-cyan">
-                            {resource.type === 'pdf' ? 'description' : 'code'}
-                          </span>
-                          <span className="text-xs text-on-surface group-hover:text-neon-cyan transition-colors truncate max-w-[180px]">
-                            {resource.name}
-                          </span>
-                        </div>
-                        <span className="material-symbols-outlined text-on-surface-variant text-base">open_in_new</span>
-                      </div>
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>{res.name}</span>
                     </a>
                   ))}
                 </div>
-              )}
-
-              {activeTab === 'deployment' && (
-                <div className="space-y-6 animate-fadeIn font-mono">
-                  <h4 className="font-display text-base font-bold text-on-surface mb-2">GCP Cloud Run Push</h4>
-                  <p className="text-xs text-on-surface-variant">Deploy your local lab container build directly into Google Cloud Platform.</p>
-                  
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between text-[10px] font-bold text-on-surface-variant">
-                      <span>DOCKER IMAGE BUILD</span>
-                      <span className="text-success-glimmer">[ BUILT ]</span>
-                    </div>
-                    <div className="h-px bg-circuit-line"></div>
-                    <div className="flex items-center justify-between text-[10px] font-bold text-on-surface-variant">
-                      <span>GCP CLOUD RUN PUSH</span>
-                      {isDeploying ? (
-                        <span className="text-neon-cyan animate-pulse">[ DEPLOYING {deploymentProgress}% ]</span>
-                      ) : (
-                        <span className="text-neon-cyan">[ READY ]</span>
-                      )}
-                    </div>
-
-                    {isDeploying && (
-                      <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden border border-circuit-line">
-                        <div className="h-full bg-neon-cyan shadow-[0_0_8px_#06b6d4] transition-all" style={{ width: `${deploymentProgress}%` }}></div>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={simulateDeployment}
-                      disabled={isDeploying}
-                      className="w-full py-3 mt-4 bg-neon-cyan text-deep-void disabled:opacity-50 text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-transparent hover:text-neon-cyan hover:border hover:border-neon-cyan transition-all cursor-pointer uppercase rounded-lg"
-                    >
-                      {isDeploying ? 'DEPLOYING TO GCP...' : 'PUSH TO GCP CLOUD RUN'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Instructor Bio */}
-          <div className="bg-surface-container border border-circuit-line p-5 rounded-lg font-mono">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="w-12 h-12 rounded-full border border-neon-cyan p-0.5 overflow-hidden">
-                  <img
-                    className="w-full h-full object-cover rounded-full"
-                    src={lesson.instructor.avatar}
-                    alt={lesson.instructor.name}
-                  />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-success-glimmer rounded-full border-2 border-surface status-glimmer"></div>
               </div>
-              <div>
-                <h5 className="text-xs font-bold text-on-surface">{lesson.instructor.name}</h5>
-                <p className="text-[10px] text-neon-cyan">{lesson.instructor.role}</p>
-                <p className="text-[9px] text-on-surface-variant mt-0.5">NDN Analytics Inc.</p>
-              </div>
+            )}
+
+            {/* Navigation Footer: Prev / Next */}
+            <div className="flex justify-between items-center pt-6 border-t border-slate-800">
+              {prevLesson ? (
+                <button
+                  onClick={() => setActiveLessonId(prevLesson.id)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Previous Lesson</span>
+                </button>
+              ) : <div />}
+
+              {nextLesson ? (
+                <button
+                  onClick={() => setActiveLessonId(nextLesson.id)}
+                  className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-all flex items-center space-x-2 cursor-pointer shadow-md"
+                >
+                  <span>Next Lesson</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : <div />}
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};

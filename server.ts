@@ -13,23 +13,26 @@ const HOST = '0.0.0.0';
 app.use(cors());
 app.use(express.json());
 
-// API route for AI Mentor Chat (Gemini LLM / Fallback Intel Kernel)
+// API route for AI Mentor Chat (Gemini LLM / Fallback Context Engine)
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, context } = req.body;
     const msgLower = (message || '').toLowerCase();
+
+    const courseTitle = context?.courseTitle || "General Cloud & AI Engineering";
+    const studentName = context?.studentName || "MSc Desmond Nkefua Student";
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      // Smart fallback logic if API key is not present in local env
-      let fallbackReply = "Greetings from NDN Analytics AI Mentor (MSc Desmond Nkefua Virtual Assistant)!\n\n";
+      // Intelligent fallback logic with contextual awareness
+      let fallbackReply = `Greetings ${studentName}!\n\nI am your NDN Analytics AI Mentor for **${courseTitle}**.\n\n`;
 
       if (msgLower.includes("gcp") || msgLower.includes("cloud run") || msgLower.includes("deploy")) {
         fallbackReply += "To deploy microservices to **Google Cloud Platform (GCP) Cloud Run**:\n\n" +
           "1. Containerize your app using Docker (`docker build -t gcr.io/ndn-analytics/app:v1 .`).\n" +
           "2. Authenticate gcloud CLI: `gcloud auth configure-docker`.\n" +
           "3. Push container to Google Artifact Registry / GCR.\n" +
-          "4. Execute deployment: `gcloud run deploy --image gcr.io/ndn-analytics/app:v1 --platform managed --region us-central1`.\n\n" +
+          "4. Execute deployment: `gcloud run deploy --image gcr.io/ndn-analytics/app:v1 --platform managed --region us-east4`.\n\n" +
           "You can verify cold start latencies and continuous deployment inside our Practical Lab Studio!";
       } else if (msgLower.includes("firebase") || msgLower.includes("firestore")) {
         fallbackReply += "To integrate **Firebase & GCP Cloud Functions**:\n\n" +
@@ -47,7 +50,7 @@ app.post('/api/chat', async (req, res) => {
           "2. Enforce Pydantic/JSON Schema structured output for predictable subagent function calling.\n" +
           "3. Connect Vertex AI Vector Search to supply enterprise RAG ground truth.";
       } else {
-        fallbackReply += "I am ready to assist you with GCP Architecture, Play Store App Publishing, Firebase, and Applied AI Engineering. What specific topic would you like to explore today?";
+        fallbackReply += `I am ready to assist you with your coursework in ${courseTitle}. Ask any specific technical question about code implementations, lab evaluations, or capstone deliverables!`;
       }
 
       return res.json({ reply: fallbackReply });
@@ -61,7 +64,7 @@ app.post('/api/chat', async (req, res) => {
         contents: [
           {
             role: 'user',
-            parts: [{ text: `You are an AI Mentor for NDN Analytics Inc. Academy, assisting students under Academic Director MSc Desmond Nkefua. Answer concisely and technically.\n\nUser Question: ${message}` }]
+            parts: [{ text: `You are an AI Mentor for NDN Analytics Inc. Academy, assisting student ${studentName} enrolled in course ${courseTitle}. Answer technically, concisely, and encouragingly.\n\nUser Question: ${message}` }]
           }
         ]
       })

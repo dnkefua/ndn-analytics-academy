@@ -1,95 +1,101 @@
 import React from 'react';
+import { BookOpen, Award, FileText, Layout, Play, ShieldCheck, HelpCircle } from 'lucide-react';
 
 interface HeaderProps {
-  currentTab: string;
-  onTabChange: (tab: string) => void;
-  operatorAvatar: string;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  studentName?: string;
 }
 
-export default function Header({ currentTab, onTabChange, operatorAvatar }: HeaderProps) {
+export const Header: React.FC<HeaderProps> = ({
+  activeTab,
+  setActiveTab,
+  studentName = "MSc Desmond Nkefua",
+}) => {
   const tabs = [
-    { id: 'dashboard', label: 'SYSTEM' },
-    { id: 'academy', label: 'CURRICULUM' },
-    { id: 'lesson', label: 'PRACTICAL LAB' },
-    { id: 'quiz', label: 'ASSESSMENTS' },
-    { id: 'transcript', label: 'TRANSCRIPTS' },
-    { id: 'certificates', label: 'CERTIFICATES' },
-    { id: 'portfolio', label: 'PORTFOLIO' }
+    { id: 'catalog', label: 'Courses' },
+    { id: 'learn', label: 'My Learning' },
+    { id: 'quiz', label: 'Assessments' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'transcript', label: 'Transcript' },
+    { id: 'certificates', label: 'Certificates' },
   ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-[100] bg-deep-void/90 backdrop-blur-lg border-b border-circuit-line shadow-[0_0_15px_rgba(6,182,212,0.1)] flex justify-between items-center px-4 md:px-12 h-16 no-print font-sans">
-      {/* Brand Logo & Title */}
-      <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onTabChange('dashboard')}>
-        <div className="relative group/logo">
+    <header className="sticky top-0 z-40 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800 shadow-lg font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Brand */}
+        <div
+          onClick={() => setActiveTab('catalog')}
+          className="flex items-center space-x-3 cursor-pointer group"
+        >
           <img
             src="/ndn_3d_logo.png"
             alt="NDN 3D Logo"
-            className="w-10 h-10 object-contain rounded-lg border border-neon-cyan/60 shadow-[0_0_15px_rgba(6,182,212,0.5)] group-hover/logo:scale-110 transition-transform duration-300"
+            className="w-9 h-9 object-contain rounded-lg border border-cyan-500/40 shadow-md group-hover:scale-105 transition-transform"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80';
             }}
           />
-          <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-success-glimmer rounded-full status-glimmer"></div>
+          <div>
+            <span className="font-extrabold text-white text-base tracking-tight font-display block">
+              NDN Analytics
+            </span>
+            <span className="text-[10px] text-cyan-400 font-bold tracking-widest uppercase block">
+              Academy Platform
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <span className="font-display text-lg md:text-xl font-black text-neon-cyan tracking-tight uppercase leading-tight">
-            NDN ANALYTICS
-          </span>
-          <span className="font-mono text-[8px] text-on-surface-variant font-bold tracking-widest uppercase">
-            ACADEMY APP
-          </span>
-        </div>
-      </div>
 
-      {/* Desktop Navigation */}
-      <div className="hidden lg:flex items-center gap-6">
-        <nav className="flex gap-4 font-mono text-[11px] font-bold tracking-wider">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`transition-colors duration-300 uppercase py-2 cursor-pointer border-b-2 ${
-                currentTab === tab.id
-                  ? 'text-neon-cyan border-neon-cyan'
-                  : 'text-on-surface-variant border-transparent hover:text-neon-cyan'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Navigation Tabs */}
+        <nav className="hidden md:flex items-center space-x-1">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id || (activeTab === 'detail' && tab.id === 'catalog');
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </nav>
 
-        {/* Student Profile Info */}
-        <div className="flex items-center gap-3 border-l border-circuit-line pl-4">
-          <div className="text-right font-mono">
-            <p className="text-[10px] font-bold text-neon-cyan tracking-wider">MSc DESMOND NKEFUA</p>
-            <p className="text-[8px] text-success-glimmer tracking-tight">[ GPA 3.96 • 300 CPD ]</p>
+        {/* Learner Avatar / Profile */}
+        <div className="flex items-center space-x-3">
+          <div className="text-right hidden sm:block">
+            <span className="text-xs font-bold text-white block">{studentName}</span>
+            <span className="text-[10px] text-emerald-400 font-semibold block">Verified Student</span>
           </div>
-          <div className="h-8 w-8 rounded-full border border-neon-cyan/40 p-0.5 overflow-hidden bg-surface-container shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-            <img
-              className="w-full h-full object-cover rounded-full"
-              src={operatorAvatar}
-              alt="Student Avatar"
-            />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 p-0.5 shadow-md">
+            <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-xs font-bold text-cyan-300">
+              DN
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Avatar / Indicator */}
-      <div className="lg:hidden flex items-center gap-2">
-        <div className="text-right font-mono">
-          <p className="text-[9px] font-bold text-neon-cyan">MSc D. NKEFUA</p>
-          <p className="text-[8px] text-success-glimmer">GPA 3.96</p>
-        </div>
-        <div className="h-8 w-8 rounded-full border border-neon-cyan/40 overflow-hidden bg-surface-container">
-          <img
-            className="w-full h-full object-cover rounded-full"
-            src={operatorAvatar}
-            alt="Student Avatar"
-          />
-        </div>
+      {/* Mobile Nav Bar */}
+      <div className="md:hidden flex overflow-x-auto border-t border-slate-800/80 px-2 py-1.5 space-x-1">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-3 py-1 rounded-md text-[11px] font-bold shrink-0 ${
+              activeTab === tab.id ? 'bg-cyan-500 text-slate-950' : 'text-slate-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
     </header>
   );
-}
+};

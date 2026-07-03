@@ -1,140 +1,177 @@
-import React, { useState } from 'react';
-import { coursesData, activeLessonData, transcriptData, certificatesData } from './data';
-import Header from './components/Header';
-import BottomNav from './components/BottomNav';
-import AcademyDashboard from './components/AcademyDashboard';
-import AcademyCatalog from './components/AcademyCatalog';
-import LessonView from './components/LessonView';
-import AssessmentEngine from './components/AssessmentEngine';
-import TranscriptView from './components/TranscriptView';
-import CertificationsView from './components/CertificationsView';
-import ProjectPortfolio from './components/ProjectPortfolio';
-import AiMentorChat from './components/AiMentorChat';
+import React, { useState, useEffect } from 'react';
+import { Course, LearnerProgress, LabSubmission, ProjectSubmission, QuizAttempt } from './types/academy';
+import { COURSES } from './data/courses';
+import {
+  getProgress,
+  setActiveCourse as saveActiveCourse,
+  markLessonComplete as saveLessonComplete,
+  saveLabSubmission as saveLabSubmissionStore,
+  saveProjectSubmission as saveProjectSubmissionStore,
+  recordQuizAttempt as saveQuizAttemptStore,
+} from './services/localProgressStore';
+import { calculateCourseGrade } from './services/gradingService';
+
+import { Header } from './components/Header';
+import { AcademyCatalog } from './components/AcademyCatalog';
+import { CourseDetail } from './components/CourseDetail';
+import { LessonView } from './components/LessonView';
+import { AssessmentEngine } from './components/AssessmentEngine';
+import { ProjectWorkbench } from './components/ProjectWorkbench';
+import { TranscriptView } from './components/TranscriptView';
+import { CertificationsView } from './components/CertificationsView';
+import { AiMentorChat } from './components/AiMentorChat';
+import { Bot, MessageSquare } from 'lucide-react';
+
+type AppTab = 'catalog' | 'detail' | 'learn' | 'quiz' | 'projects' | 'transcript' | 'certificates';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<string>('dashboard');
-  const [selectedCourseId, setSelectedCourseId] = useState<string>('firebase-gcp-app-dev');
-  const [aiMentorOpen, setAiMentorOpen] = useState(false);
-  const [badgeAwarded, setBadgeAwarded] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<AppTab>('catalog');
+  const [learnerProgress, setLearnerProgress] = useState<LearnerProgress>(getProgress());
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [activeQuizId, setActiveQuizId] = useState<string | undefined>(undefined);
+  const [aiChatOpen, setAiChatOpen] = useState<boolean>(false);
 
-  const operatorAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+  // Sync progress state
+  useEffect(() => {
+    setLearnerProgress(getProgress());
+  }, []);
 
-  const handleSelectCourse = (courseId: string) => {
-    setSelectedCourseId(courseId);
-    setCurrentTab('lesson');
+  const handleSelectCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setActiveTab('detail');
   };
 
-  const handleSelectTrack = (trackId: string) => {
-    setCurrentTab('academy');
+  const handleStartCourse = (courseId: string) => {
+    const targetCourse = COURSES.find(c => c.id === courseId) || COURSES[0];
+    setSelectedCourse(targetCourse);
+    const updated = saveActiveCourse(courseId);
+    setLearnerProgress(updated);
+    setActiveTab('learn');
   };
 
-  const handleAwardBadge = (badgeName: string) => {
-    setBadgeAwarded(badgeName);
+  const handleMarkLessonComplete = (lessonId: string) => {
+    const updated = saveLessonComplete(lessonId);
+    setLearnerProgress(updated);
   };
+
+  const handleSaveLabSubmission = (submission: LabSubmission) => {
+    const updated = saveLabSubmissionStore(submission);
+    setLearnerProgress(updated);
+  };
+
+  const handleRecordQuizAttempt = (attempt: QuizAttempt) => {
+    const updated = saveQuizAttemptStore(attempt);
+    setLearnerProgress(updated);
+  };
+
+  const handleSaveProjectSubmission = (submission: ProjectSubmission) => {
+    const updated = saveProjectSubmissionStore(submission);
+    setLearnerProgress(updated);
+  };
+
+  const handleOpenQuiz = (quizId: string) => {
+    setActiveQuizId(quizId);
+    setActiveTab('quiz');
+  };
+
+  // Build progress % map for catalog cards
+  const progressPercentMap: Record<string, number> = {};
+  COURSES.forEach(c => {
+    const summary = calculateCourseGrade(c.id, learnerProgress);
+    progressPercentMap[c.id] = summary.completionPercent;
+  });
 
   return (
-    <div className="min-h-screen bg-deep-void text-on-surface flex flex-col relative circuit-bg font-sans">
-      {/* Top Header Navigation */}
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950">
+      {/* Background Circuit Grid Accent */}
+      <div className="fixed inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none z-0" />
+
+      {/* Header Navigation */}
       <Header
-        currentTab={currentTab}
-        onTabChange={setCurrentTab}
-        operatorAvatar={operatorAvatar}
+        activeTab={activeTab}
+        setActiveTab={(tab) => setActiveTab(tab as AppTab)}
+        studentName={learnerProgress.studentName}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 pt-24 pb-28 md:pb-12 px-4 md:px-12 max-w-7xl mx-auto w-full transition-all duration-300">
-        {currentTab === 'dashboard' && (
-          <AcademyDashboard
-            onContinue={() => setCurrentTab('lesson')}
-            onSelectTrack={handleSelectTrack}
-          />
-        )}
-
-        {currentTab === 'academy' && (
+      {/* Main Container */}
+      <main className="flex-1 relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'catalog' && (
           <AcademyCatalog
-            courses={coursesData}
             onSelectCourse={handleSelectCourse}
+            onStartCourse={handleStartCourse}
+            activeCourseId={learnerProgress.activeCourseId}
+            learnerProgressPercentMap={progressPercentMap}
           />
         )}
 
-        {currentTab === 'lesson' && (
+        {activeTab === 'detail' && selectedCourse && (
+          <CourseDetail
+            course={selectedCourse}
+            onStartCourse={handleStartCourse}
+            onBackToCatalog={() => setActiveTab('catalog')}
+            isEnrolled={learnerProgress.activeCourseId === selectedCourse.id}
+          />
+        )}
+
+        {activeTab === 'learn' && (
           <LessonView
-            lesson={activeLessonData}
-            onTakeQuiz={() => setCurrentTab('quiz')}
+            courseId={learnerProgress.activeCourseId || COURSES[0].id}
+            learnerProgress={learnerProgress}
+            onMarkLessonComplete={handleMarkLessonComplete}
+            onSaveLabSubmission={handleSaveLabSubmission}
+            onOpenQuiz={handleOpenQuiz}
+            onBackToCatalog={() => setActiveTab('catalog')}
           />
         )}
 
-        {currentTab === 'quiz' && (
+        {activeTab === 'quiz' && (
           <AssessmentEngine
-            onBackToLesson={() => setCurrentTab('lesson')}
-            onAwardBadge={handleAwardBadge}
+            quizId={activeQuizId}
+            onRecordAttempt={handleRecordQuizAttempt}
+            onBackToSyllabus={() => setActiveTab('learn')}
           />
         )}
 
-        {currentTab === 'transcript' && (
-          <TranscriptView transcript={transcriptData} />
+        {activeTab === 'projects' && (
+          <ProjectWorkbench
+            learnerProgress={learnerProgress}
+            onSaveProjectSubmission={handleSaveProjectSubmission}
+          />
         )}
 
-        {currentTab === 'certificates' && (
-          <CertificationsView certificates={certificatesData} />
+        {activeTab === 'transcript' && (
+          <TranscriptView
+            learnerProgress={learnerProgress}
+          />
         )}
 
-        {currentTab === 'portfolio' && (
-          <ProjectPortfolio />
+        {activeTab === 'certificates' && (
+          <CertificationsView
+            learnerProgress={learnerProgress}
+          />
         )}
       </main>
 
-      {/* Badge Award Celebration Modal */}
-      {badgeAwarded && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] px-4 backdrop-blur-md animate-fadeIn no-print">
-          <div className="bg-surface-container border border-neon-cyan p-8 text-center max-w-sm relative hud-border shadow-[0_0_30px_#06b6d4]">
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-neon-cyan"></div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-neon-cyan"></div>
-
-            <div className="w-20 h-20 bg-secondary-container/20 border border-secondary-container rounded-full flex items-center justify-center text-neon-cyan mx-auto mb-6 shadow-[0_0_15px_rgba(96,1,209,0.5)]">
-              <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                workspace_premium
-              </span>
-            </div>
-
-            <p className="font-mono text-[10px] text-neon-cyan font-bold tracking-widest uppercase mb-2">
-              [ ACADEMIC BADGE UNLOCKED ]
-            </p>
-            <h3 className="font-display text-2xl font-bold text-white mb-4">
-              {badgeAwarded.replace(/_/g, ' ')}
-            </h3>
-            <p className="font-mono text-xs text-on-surface-variant leading-relaxed mb-6">
-              Congratulations MSc Desmond Nkefua! You have validated your practical logic score. Credentials appended to your official NDN Analytics transcript.
-            </p>
-
-            <button
-              onClick={() => setBadgeAwarded(null)}
-              className="w-full py-3 bg-neon-cyan text-deep-void font-bold text-xs hover:bg-transparent hover:text-neon-cyan border border-neon-cyan transition-colors cursor-pointer uppercase font-mono"
-            >
-              ACKNOWLEDGE & CLAIM CREDITS
-            </button>
+      {/* Floating AI Mentor Chat Button / Modal */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {aiChatOpen ? (
+          <div className="w-80 sm:w-96 h-[500px]">
+            <AiMentorChat
+              learnerProgress={learnerProgress}
+              activeCourseId={learnerProgress.activeCourseId}
+              onClose={() => setAiChatOpen(false)}
+            />
           </div>
-        </div>
-      )}
-
-      {/* Floating AI Mentor Button (FAB) */}
-      <div className="fixed bottom-20 md:bottom-8 right-6 md:right-8 z-[110] no-print">
-        <button
-          onClick={() => setAiMentorOpen(!aiMentorOpen)}
-          className="flex items-center gap-2 px-4 py-3 bg-secondary-container hover:bg-secondary-container/80 text-white rounded-full border border-neon-cyan shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all font-mono text-[10px] font-bold tracking-wider cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-            psychology
-          </span>
-          ASK_AI_MENTOR
-        </button>
+        ) : (
+          <button
+            onClick={() => setAiChatOpen(true)}
+            className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-bold shadow-xl shadow-cyan-500/25 flex items-center space-x-2.5 transition-all hover:scale-105 cursor-pointer"
+          >
+            <Bot className="w-6 h-6 text-slate-950" />
+            <span className="text-xs font-extrabold font-display">AI MENTOR</span>
+          </button>
+        )}
       </div>
-
-      {/* AI Mentor Chat Widget */}
-      <AiMentorChat isOpen={aiMentorOpen} onClose={() => setAiMentorOpen(false)} />
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNav currentTab={currentTab} onTabChange={setCurrentTab} />
     </div>
   );
 }

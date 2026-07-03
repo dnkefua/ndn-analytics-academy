@@ -1,200 +1,218 @@
 import React, { useState } from 'react';
-import { Course } from '../types';
+import { COURSES } from '../data/courses';
+import { MODULES } from '../data/modules';
+import { Course, CourseCategory, CourseLevel } from '../types/academy';
+import { Search, Filter, Clock, Award, BookOpen, ChevronRight, Play, Eye } from 'lucide-react';
 
 interface AcademyCatalogProps {
-  courses: Course[];
-  onSelectCourse: (courseId: string) => void;
+  onSelectCourse: (course: Course) => void;
+  onStartCourse: (courseId: string) => void;
+  activeCourseId?: string;
+  learnerProgressPercentMap?: Record<string, number>;
 }
 
-export default function AcademyCatalog({ courses, onSelectCourse }: AcademyCatalogProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [levelFilter, setLevelFilter] = useState('ALL');
-  const [tagFilter, setTagFilter] = useState('ALL');
+export const AcademyCatalog: React.FC<AcademyCatalogProps> = ({
+  onSelectCourse,
+  onStartCourse,
+  activeCourseId,
+  learnerProgressPercentMap = {}
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<CourseCategory | "ALL">("ALL");
+  const [selectedLevel, setSelectedLevel] = useState<CourseLevel | "ALL">("ALL");
 
-  const filteredCourses = courses.filter((course) => {
+  const filteredCourses = COURSES.filter((course) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase());
+      course.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesLevel =
-      levelFilter === 'ALL' ||
-      course.level === levelFilter;
+    const matchesCategory = selectedCategory === "ALL" || course.category === selectedCategory;
+    const matchesLevel = selectedLevel === "ALL" || course.level === selectedLevel;
 
-    const matchesTag =
-      tagFilter === 'ALL' ||
-      (tagFilter === 'FIREBASE' && (course.category === 'FIREBASE_GCP' || course.title.includes('Firebase'))) ||
-      (tagFilter === 'GCP' && course.category === 'GCP_ARCHITECTURE') ||
-      (tagFilter === 'PLAY_STORE' && course.category === 'PLAY_STORE_DEV') ||
-      (tagFilter === 'AI' && (course.category === 'AI_ENGINEERING' || course.category === 'BIGDATA_MLOPS'));
-
-    return matchesSearch && matchesLevel && matchesTag;
+    return matchesSearch && matchesCategory && matchesLevel;
   });
 
-  const toggleLevelFilter = () => {
-    const levels = ['ALL', 'L1_FOUNDATION', 'L2_INTERMEDIATE', 'L3_PROFESSIONAL', 'L4_EXPERT'];
-    const currentIndex = levels.indexOf(levelFilter);
-    const nextIndex = (currentIndex + 1) % levels.length;
-    setLevelFilter(levels[nextIndex]);
-  };
-
-  const toggleTagFilter = () => {
-    const tags = ['ALL', 'FIREBASE', 'GCP', 'PLAY_STORE', 'AI'];
-    const currentIndex = tags.indexOf(tagFilter);
-    const nextIndex = (currentIndex + 1) % tags.length;
-    setTagFilter(tags[nextIndex]);
-  };
-
-  const resetFilters = () => {
-    setSearchQuery('');
-    setLevelFilter('ALL');
-    setTagFilter('ALL');
-  };
-
   return (
-    <section className="mb-12 font-sans">
-      {/* Header Block */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-l-4 border-neon-cyan pl-6 mb-8">
-        <div>
-          <span className="font-mono text-[10px] font-bold text-neon-cyan mb-2 block uppercase tracking-widest">
-            [ ACADEMY_CATALOG ]
-          </span>
-          <h1 className="font-display text-4xl md:text-5xl font-extrabold leading-tight tracking-tight text-white">
-            Masterclass Engineering
-            <br />
-            Curriculum
+    <div className="space-y-8 animate-fade-in text-slate-100 pb-16">
+      {/* Catalog Header */}
+      <div className="relative rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 p-8 overflow-hidden shadow-xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 max-w-3xl space-y-3">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <span>NDN Analytics Engineering Curriculum</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-display text-white">
+            Project-Based Course Catalog
           </h1>
+          <p className="text-base text-slate-300 leading-relaxed">
+            Build real AI models, GCP microservices, Android Play Store apps, and Firebase backends adhering to NDN Analytics engineering standards.
+          </p>
         </div>
-        <div className="flex flex-col gap-2 font-mono">
-          <div className="flex items-center gap-3 text-xs text-on-surface-variant">
-            <span className="w-2.5 h-2.5 rounded-full bg-success-glimmer status-glimmer"></span>
-            [ 5 Master Tracks Available ]
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search */}
+          <div className="relative md:col-span-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search courses, tools, or skills..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+            />
           </div>
-          <div className="flex items-center gap-3 text-xs text-on-surface-variant">
-            <span className="w-2.5 h-2.5 rounded-full bg-warning-amber"></span>
-            [ 300 CPD Credits Total ]
+
+          {/* Category Filter */}
+          <div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as any)}
+              className="w-full px-3 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
+            >
+              <option value="ALL">All Categories</option>
+              <option value="FIREBASE_GCP">Firebase & GCP</option>
+              <option value="GCP_ARCHITECTURE">GCP Architecture</option>
+              <option value="PLAY_STORE_DEV">Play Store Publishing</option>
+              <option value="AI_ENGINEERING">AI Engineering & Gemini</option>
+              <option value="BIGDATA_MLOPS">BigQuery & MLOps</option>
+            </select>
+          </div>
+
+          {/* Level Filter */}
+          <div>
+            <select
+              value={selectedLevel}
+              onChange={(e) => setSelectedLevel(e.target.value as any)}
+              className="w-full px-3 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
+            >
+              <option value="ALL">All Competency Levels</option>
+              <option value="L1_FOUNDATION">L1 Foundation</option>
+              <option value="L2_INTERMEDIATE">L2 Intermediate</option>
+              <option value="L3_PROFESSIONAL">L3 Professional</option>
+              <option value="L4_EXPERT">L4 Expert</option>
+            </select>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="glass-card p-4 flex flex-wrap items-center gap-4 border border-circuit-line mb-8 font-mono">
-        <div className="flex-1 min-w-[200px] relative">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
-            search
-          </span>
-          <input
-            className="w-full bg-surface-container-lowest border border-circuit-line focus:border-neon-cyan rounded-none pl-10 pr-4 py-2 text-xs text-neon-cyan placeholder:text-on-surface-variant outline-none transition-all"
-            placeholder="QUERY_COURSE_DATABASE..."
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={toggleLevelFilter}
-            className="px-4 py-2 border border-circuit-line text-[10px] font-bold tracking-wider hover:bg-neon-cyan/10 hover:border-neon-cyan text-on-surface transition-all cursor-pointer"
-          >
-            LEVEL: {levelFilter.replace(/_/g, ' ')}
-          </button>
-          <button
-            onClick={toggleTagFilter}
-            className="px-4 py-2 border border-circuit-line text-[10px] font-bold tracking-wider hover:bg-neon-cyan/10 hover:border-neon-cyan text-on-surface transition-all cursor-pointer"
-          >
-            TAGS: {tagFilter}
-          </button>
-          <button
-            onClick={resetFilters}
-            className="px-4 py-2 border border-neon-cyan bg-neon-cyan/10 text-neon-cyan text-[10px] font-bold tracking-wider flex items-center gap-2 hover:bg-neon-cyan hover:text-deep-void transition-all cursor-pointer uppercase"
-          >
-            <span className="material-symbols-outlined text-sm">tune</span> REFRESH
-          </button>
-        </div>
-      </div>
+      {/* Course Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCourses.map((course) => {
+          const courseModules = MODULES.filter(m => m.courseId === course.id);
+          const progressPercent = learnerProgressPercentMap[course.id] || 0;
+          const isActive = activeCourseId === course.id;
 
-      {/* Grid of Course Cards */}
-      {filteredCourses.length === 0 ? (
-        <div className="glass-card p-12 text-center border border-circuit-line">
-          <p className="font-mono text-sm text-on-surface-variant mb-2">NO MATCHES FOUND IN DATABASE</p>
-          <button onClick={resetFilters} className="text-neon-cyan underline font-mono text-xs cursor-pointer">
-            CLEAR ALL FILTERS
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredCourses.map((course) => (
+          return (
             <div
               key={course.id}
-              className="group glass-card overflow-hidden flex flex-col transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:border-neon-cyan border border-circuit-line rounded-xl"
+              className={`group rounded-2xl bg-slate-900/90 border transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-lg ${
+                isActive ? 'border-cyan-500 ring-1 ring-cyan-500/50' : 'border-slate-800/80 hover:border-slate-700 hover:shadow-cyan-500/10'
+              }`}
             >
-              <div className="h-48 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-deep-void to-transparent z-10"></div>
-                <img
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src={course.image}
-                  alt={course.title}
-                />
-                <div className="absolute top-4 left-4 z-20 flex gap-2">
-                  <span className="px-3 py-1 bg-deep-void/80 border border-neon-cyan text-neon-cyan font-mono text-[9px] tracking-tighter rounded">
-                    [ {course.level} ]
-                  </span>
+              <div>
+                {/* Image Banner */}
+                <div className="relative h-44 w-full overflow-hidden bg-slate-950">
+                  <img
+                    src={course.image}
+                    alt={course.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+
+                  {/* Badges */}
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-950/80 backdrop-blur-md text-cyan-400 border border-cyan-500/30">
+                      {course.code}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-950/80 backdrop-blur-md text-indigo-300 border border-indigo-500/30">
+                      {course.level.replace('_', ' ')}
+                    </span>
+                  </div>
+
+                  {course.finalProjectId && (
+                    <div className="absolute top-3 right-3">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        Capstone Project
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                  <h3 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors font-display line-clamp-2">
+                    {course.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-300 line-clamp-2 leading-relaxed">
+                    {course.shortDescription}
+                  </p>
+
+                  {/* Outcome */}
+                  <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800/60 text-xs text-slate-300">
+                    <span className="font-bold text-cyan-400">Outcome:</span> {course.outcomes[0]}
+                  </div>
+
+                  {/* Specs */}
+                  <div className="grid grid-cols-3 gap-2 pt-1 text-xs text-slate-400 border-t border-slate-800/60">
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{course.durationHours}h</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Award className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{course.cpdCredits} CPD</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>{courseModules.length} Modules</span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar if started */}
+                  {progressPercent > 0 && (
+                    <div className="space-y-1 pt-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-400 font-medium">Progress</span>
+                        <span className="text-cyan-400 font-bold">{progressPercent}%</span>
+                      </div>
+                      <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 rounded-full"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="font-display text-xl font-bold mb-2 leading-tight group-hover:text-neon-cyan transition-colors duration-300 text-white">
-                  {course.title}
-                </h3>
-                <p className="text-xs text-on-surface-variant mb-6 flex-1 leading-relaxed">
-                  {course.description}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 mb-6 border-y border-circuit-line py-4 font-mono">
-                  <div>
-                    <span className="block text-[9px] text-on-surface-variant mb-1 uppercase tracking-wider">
-                      Duration
-                    </span>
-                    <span className="text-xs font-bold text-on-surface">
-                      {course.duration}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="block text-[9px] text-on-surface-variant mb-1 uppercase tracking-wider">
-                      Credits
-                    </span>
-                    <span className="text-xs font-bold text-neon-cyan">
-                      {course.credits}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mb-6 font-mono">
-                  <span className="block text-[9px] text-on-surface-variant mb-3 uppercase tracking-wider">
-                    Syllabus Overview
-                  </span>
-                  <ul className="space-y-2">
-                    {course.syllabus.map((item, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs text-on-surface-variant">
-                        <span className="material-symbols-outlined text-xs mt-0.5 text-neon-cyan select-none">
-                          subdirectory_arrow_right
-                        </span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              {/* Action Buttons */}
+              <div className="p-6 pt-0 grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => onSelectCourse(course)}
+                  className="w-full py-2.5 px-3 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>View Overview</span>
+                </button>
 
                 <button
-                  onClick={() => onSelectCourse(course.id)}
-                  className="w-full py-3 border border-neon-cyan bg-neon-cyan text-deep-void font-mono text-xs font-bold tracking-wider hover:bg-transparent hover:text-neon-cyan transition-all flex items-center justify-center gap-2 cursor-pointer uppercase rounded-lg"
+                  onClick={() => onStartCourse(course.id)}
+                  className="w-full py-2.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-cyan-500/20"
                 >
-                  INITIALIZE_ENROLLMENT <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>{progressPercent > 0 ? "Continue" : "Start Course"}</span>
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-    </section>
+          );
+        })}
+      </div>
+    </div>
   );
-}
+};

@@ -1,267 +1,209 @@
-import React, { useState, useEffect } from 'react';
-import { quizQuestions } from '../data';
+import React, { useState } from 'react';
+import { QuizQuestion, QuizAttempt } from '../types/academy';
+import { QUIZZES } from '../data/quizzes';
+import { HelpCircle, CheckCircle, XCircle, RefreshCw, Award, BookOpen, ArrowRight } from 'lucide-react';
 
 interface AssessmentEngineProps {
-  onBackToLesson: () => void;
-  onAwardBadge: (badgeName: string) => void;
+  quizId?: string;
+  onRecordAttempt: (attempt: QuizAttempt) => void;
+  onBackToSyllabus: () => void;
 }
 
-export default function AssessmentEngine({ onBackToLesson, onAwardBadge }: AssessmentEngineProps) {
-  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
-  const quiz = quizQuestions[currentQuizIndex] || quizQuestions[0];
+export const AssessmentEngine: React.FC<AssessmentEngineProps> = ({
+  quizId,
+  onRecordAttempt,
+  onBackToSyllabus,
+}) => {
+  const currentQuiz = QUIZZES.find(q => q.id === quizId) || QUIZZES[0];
+  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const [selectedOption, setSelectedOption] = useState<string>('');
-  const [timerSeconds, setTimerSeconds] = useState(900);
-  const [isAnswerValidated, setIsAnswerValidated] = useState(false);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [scoreCount, setScoreCount] = useState(0);
+  const isMultiSelect = currentQuiz.type === 'multi_select';
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTimer = (totalSecs: number) => {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleValidateLogic = () => {
-    if (!selectedOption) return;
-    setIsAnswerValidated(true);
-    const correct = selectedOption === quiz.correctAnswer;
-    setIsCorrect(correct);
-
-    if (correct) {
-      setScoreCount((prev) => prev + 150);
-      onAwardBadge(quiz.potentialRewards[0]?.name || 'CERTIFIED_ENGINEER');
-    }
-  };
-
-  const handleNextQuestion = () => {
-    setIsAnswerValidated(false);
-    setSelectedOption('');
-    setIsCorrect(null);
-    if (currentQuizIndex < quizQuestions.length - 1) {
-      setCurrentQuizIndex((prev) => prev + 1);
+  const toggleOption = (key: string) => {
+    if (submitted) return;
+    if (isMultiSelect) {
+      if (selectedAnswers.includes(key)) {
+        setSelectedAnswers(selectedAnswers.filter(k => k !== key));
+      } else {
+        setSelectedAnswers([...selectedAnswers, key]);
+      }
     } else {
-      setCurrentQuizIndex(0);
+      setSelectedAnswers([key]);
     }
+  };
+
+  const isCorrect = () => {
+    if (isMultiSelect) {
+      const correctArr = Array.isArray(currentQuiz.correctAnswer) ? currentQuiz.correctAnswer : [currentQuiz.correctAnswer];
+      if (selectedAnswers.length !== correctArr.length) return false;
+      return selectedAnswers.every(k => correctArr.includes(k));
+    }
+    return selectedAnswers[0] === currentQuiz.correctAnswer;
+  };
+
+  const handleSubmit = () => {
+    if (selectedAnswers.length === 0) return;
+    setSubmitted(true);
+
+    const correct = isCorrect();
+    const score = correct ? 100 : 0;
+
+    const attempt: QuizAttempt = {
+      id: `qa-${Date.now()}`,
+      quizId: currentQuiz.id,
+      courseId: currentQuiz.courseId,
+      moduleId: currentQuiz.moduleId,
+      selectedAnswer: isMultiSelect ? selectedAnswers : selectedAnswers[0],
+      isCorrect: correct,
+      score,
+      attemptedAt: new Date().toISOString()
+    };
+
+    onRecordAttempt(attempt);
+  };
+
+  const handleRetake = () => {
+    setSelectedAnswers([]);
+    setSubmitted(false);
   };
 
   return (
-    <div className="space-y-8 pb-12 font-mono">
-      {/* Navigation & Header */}
-      <div className="flex justify-between items-center no-print">
-        <button
-          onClick={onBackToLesson}
-          className="text-xs font-bold text-neon-cyan hover:text-primary flex items-center gap-2 cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-sm">arrow_back</span>
-          RETURN_TO_LAB
-        </button>
-
-        <span className="text-xs font-bold text-on-surface-variant">
-          ASSESSMENT {currentQuizIndex + 1} OF {quizQuestions.length}
-        </span>
-      </div>
-
-      {/* HUD Score & Timer Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Progress */}
-        <div className="bg-surface-container-low/50 border border-circuit-line p-6 relative overflow-hidden rounded-md">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-neon-cyan to-transparent animate-pulse"></div>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-[9px] font-bold text-on-surface-variant mb-1 tracking-wider">EVALUATION_PROGRESS</p>
-              <h2 className="font-display text-4xl font-extrabold text-neon-cyan">
-                0{currentQuizIndex + 1}<span className="text-on-surface-variant/30">/0{quizQuestions.length}</span>
-              </h2>
-            </div>
-            <span className="material-symbols-outlined text-neon-cyan/40 text-4xl">analytics</span>
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in text-slate-100 pb-16">
+      {/* Header */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <HelpCircle className="w-4 h-4" />
+              <span>MODULE EVALUATION QUIZ ({currentQuiz.type.replace('_', ' ').toUpperCase()})</span>
+            </span>
+            <h1 className="text-2xl font-bold text-white font-display">Technical Assessment Engine</h1>
           </div>
-          <div className="mt-4 w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
-            <div className="h-full bg-neon-cyan" style={{ width: `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%` }}></div>
-          </div>
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            {currentQuiz.difficulty.toUpperCase()}
+          </span>
         </div>
 
-        {/* Global Timer */}
-        <div className="bg-surface-container-low/50 border border-circuit-line p-6 relative overflow-hidden rounded-md">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning-amber to-transparent animate-pulse"></div>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-[9px] font-bold text-on-surface-variant mb-1 tracking-wider">REMAINING_TIME</p>
-              <h2 className="font-display text-4xl font-extrabold text-warning-amber">
-                {formatTimer(timerSeconds)}
-              </h2>
-            </div>
-            <span className="material-symbols-outlined text-warning-amber/40 text-4xl">timer</span>
+        <p className="text-sm text-slate-300 leading-relaxed">{currentQuiz.question}</p>
+
+        {/* Code Snippet if present */}
+        {currentQuiz.codeSnippet && (
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-cyan-300 overflow-x-auto">
+            <pre>{currentQuiz.codeSnippet}</pre>
           </div>
-          <div className="mt-4 flex gap-1">
-            <div className="flex-1 h-1 bg-warning-amber"></div>
-            <div className="flex-1 h-1 bg-warning-amber"></div>
-            <div className="flex-1 h-1 bg-warning-amber/20"></div>
-          </div>
-        </div>
+        )}
 
-        {/* CPD Intel Credits */}
-        <div className="bg-surface-container-low/50 border border-circuit-line p-6 relative overflow-hidden rounded-md">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-[9px] font-bold text-on-surface-variant mb-1 tracking-wider">ACADEMIC_CREDITS</p>
-              <h2 className="font-display text-4xl font-extrabold text-primary">300 <span className="text-xs text-neon-cyan">+{scoreCount}</span></h2>
-            </div>
-            <span className="material-symbols-outlined text-primary/40 text-4xl">workspace_premium</span>
-          </div>
-          <p className="mt-4 text-[10px] text-success-glimmer font-bold">[ VERIFIED ACADEMIC STANDING ]</p>
-        </div>
-      </div>
+        {/* Options List */}
+        <div className="space-y-3 pt-2">
+          {currentQuiz.options.map((opt) => {
+            const isSelected = selectedAnswers.includes(opt.key);
+            let optionStyle = "border-slate-800 bg-slate-950 hover:border-slate-700 text-slate-300";
 
-      {/* Main Question & Options */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8 space-y-6">
-          <div className="bg-surface-container-low border border-circuit-line p-6 md:p-10 relative hud-border rounded-lg">
-            <div className="flex items-start gap-3 mb-6">
-              <span className="text-[10px] font-bold text-neon-cyan border border-neon-cyan px-2 py-1 bg-neon-cyan/10">
-                {quiz.category}
-              </span>
-              <span className="text-xs text-on-surface-variant opacity-60 mt-0.5">ID: {quiz.idCode}</span>
-            </div>
+            if (submitted) {
+              const isAns = isMultiSelect
+                ? (Array.isArray(currentQuiz.correctAnswer) && currentQuiz.correctAnswer.includes(opt.key))
+                : currentQuiz.correctAnswer === opt.key;
 
-            <h1 className="font-display text-xl md:text-2xl font-extrabold text-on-surface mb-8 leading-relaxed">
-              {quiz.question}
-            </h1>
+              if (isAns) {
+                optionStyle = "border-emerald-500 bg-emerald-950/40 text-emerald-200 font-semibold";
+              } else if (isSelected) {
+                optionStyle = "border-rose-500 bg-rose-950/40 text-rose-200";
+              }
+            } else if (isSelected) {
+              optionStyle = "border-cyan-500 bg-cyan-950/40 text-cyan-200 font-semibold";
+            }
 
-            <div className="space-y-4">
-              {quiz.options.map((option) => {
-                const isSelected = selectedOption === option.key;
-                return (
-                  <button
-                    key={option.key}
-                    onClick={() => {
-                      if (!isAnswerValidated) setSelectedOption(option.key);
-                    }}
-                    disabled={isAnswerValidated}
-                    className="w-full text-left cursor-pointer transition-all"
-                  >
-                    <div
-                      className={`border p-5 flex items-center gap-4 rounded-lg relative transition-all ${
-                        isSelected
-                          ? 'bg-primary-container/10 border-neon-cyan shadow-[0_0_15px_rgba(6,182,212,0.1)]'
-                          : 'bg-surface-container/50 border-circuit-line hover:border-neon-cyan/60'
-                      }`}
-                    >
-                      <div
-                        className={`w-8 h-8 rounded border flex items-center justify-center text-sm font-bold ${
-                          isSelected
-                            ? 'bg-neon-cyan text-deep-void border-neon-cyan'
-                            : 'border-circuit-line text-on-surface-variant'
-                        }`}
-                      >
-                        {option.key}
-                      </div>
-                      <span className={`text-xs md:text-sm ${isSelected ? 'text-white font-bold' : 'text-on-surface-variant'}`}>
-                        {option.text}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {isAnswerValidated && (
-              <div className={`mt-6 p-4 border rounded-md text-xs space-y-2 ${
-                isCorrect 
-                  ? 'bg-success-glimmer/10 border-success-glimmer text-success-glimmer' 
-                  : 'bg-error/10 border-error text-error'
-              }`}>
-                <p className="flex items-center gap-2 font-bold">
-                  <span className="material-symbols-outlined text-sm">{isCorrect ? 'verified' : 'error'}</span>
-                  {isCorrect ? 'CORRECT LOGIC VERIFIED! [+150 INTEL CREDITS AWARDED]' : 'INCORRECT ANSWER SELECTED'}
-                </p>
-                <p className="text-on-surface-variant leading-relaxed text-[11px]">
-                  <strong>Explanation:</strong> {quiz.explanation}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-8 flex justify-between items-center border-t border-circuit-line pt-6">
+            return (
               <button
-                onClick={handleNextQuestion}
-                className="text-[10px] font-bold text-on-surface-variant hover:text-neon-cyan flex items-center gap-2 cursor-pointer uppercase"
+                key={opt.key}
+                onClick={() => toggleOption(opt.key)}
+                className={`w-full text-left p-4 rounded-xl border transition-all flex items-start space-x-3 cursor-pointer ${optionStyle}`}
               >
-                SKIP QUESTION →
+                <span className="w-6 h-6 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-bold shrink-0">
+                  {opt.key}
+                </span>
+                <span className="text-sm pt-0.5">{opt.text}</span>
               </button>
-
-              {isAnswerValidated ? (
-                <button
-                  onClick={handleNextQuestion}
-                  className="bg-neon-cyan text-deep-void text-[10px] font-bold tracking-widest px-6 py-3 border border-neon-cyan cursor-pointer uppercase hover:bg-transparent hover:text-neon-cyan transition-all rounded-lg"
-                >
-                  NEXT QUESTION →
-                </button>
-              ) : (
-                <button
-                  onClick={handleValidateLogic}
-                  disabled={!selectedOption}
-                  className="bg-neon-cyan text-deep-void text-[10px] font-bold tracking-widest px-8 py-3 border border-neon-cyan disabled:opacity-50 cursor-pointer uppercase hover:bg-transparent hover:text-neon-cyan transition-all rounded-lg"
-                >
-                  SUBMIT ANSWER
-                </button>
-              )}
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* Right Column: Rewards & Docs */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-surface-container-high border border-circuit-line p-6 rounded-lg space-y-4">
-            <p className="text-[10px] font-bold text-neon-cyan border-b border-circuit-line pb-2 tracking-widest uppercase">
-              POTENTIAL_ACADEMIC_REWARDS
-            </p>
-            <div className="space-y-3">
-              {quiz.potentialRewards.map((reward, idx) => (
-                <div key={idx} className="flex items-center gap-4 bg-surface-container p-3 border border-circuit-line rounded">
-                  <div className="w-10 h-10 bg-secondary-container/20 border border-secondary-container flex items-center justify-center text-neon-cyan rounded">
-                    <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      {reward.icon}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-on-surface">{reward.name}</p>
-                    <p className="text-[10px] text-on-surface-variant">{reward.badge}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Action Controls */}
+        <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+          <button
+            onClick={onBackToSyllabus}
+            className="text-xs text-slate-400 hover:text-cyan-400 cursor-pointer"
+          >
+            ← Return to Module Syllabus
+          </button>
+
+          {!submitted ? (
+            <button
+              onClick={handleSubmit}
+              disabled={selectedAnswers.length === 0}
+              className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-slate-950 font-bold text-xs transition-all cursor-pointer shadow-md"
+            >
+              Submit Assessment Answer
+            </button>
+          ) : (
+            <button
+              onClick={handleRetake}
+              className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-all flex items-center space-x-2 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retake Quiz</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Explanation & Technical Feedback Panel */}
+      {submitted && (
+        <div className={`p-6 rounded-2xl border space-y-4 shadow-xl ${
+          isCorrect()
+            ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
+            : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+        }`}>
+          <div className="flex items-center space-x-3 font-bold text-lg">
+            {isCorrect() ? (
+              <>
+                <CheckCircle className="w-6 h-6 text-emerald-400" />
+                <span>Correct Answer! 100% Evaluation Score</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="w-6 h-6 text-rose-400" />
+                <span>Incorrect Selection</span>
+              </>
+            )}
           </div>
 
-          <div className="bg-surface-container-low border border-circuit-line p-6 rounded-lg space-y-3">
-            <p className="text-[10px] font-bold text-on-surface-variant border-b border-circuit-line pb-2 tracking-widest uppercase">
-              RECOMMENDED_READING
-            </p>
-            <ul className="space-y-2 text-xs">
-              {quiz.technicalResources.map((doc, idx) => (
-                <li key={idx}>
+          <div className="space-y-2 text-sm text-slate-300 leading-relaxed">
+            <h5 className="font-bold text-white text-xs uppercase tracking-wider">Technical Explanation</h5>
+            <p>{currentQuiz.explanation}</p>
+          </div>
+
+          {currentQuiz.technicalResources && currentQuiz.technicalResources.length > 0 && (
+            <div className="pt-2 border-t border-slate-800/80 space-y-2">
+              <h5 className="font-bold text-white text-xs uppercase tracking-wider">Recommended Docs</h5>
+              <div className="flex flex-wrap gap-2">
+                {currentQuiz.technicalResources.map((res, i) => (
                   <a
-                    href={doc.url}
+                    key={i}
+                    href={res.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-neon-cyan hover:underline flex items-center justify-between"
+                    className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs text-cyan-400 hover:text-cyan-300"
                   >
-                    <span>{doc.title}</span>
-                    <span className="material-symbols-outlined text-xs">open_in_new</span>
+                    {res.name || res.url}
                   </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
-}
+};
