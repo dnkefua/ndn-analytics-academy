@@ -7,7 +7,8 @@ import { createServer as createViteServer } from 'vite';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 8080;
+const HOST = '0.0.0.0';
 
 app.use(cors());
 app.use(express.json());
@@ -92,8 +93,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, () => {
-    console.log(`[ NDN ACADEMY APP ] Server running on http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`[ NDN ACADEMY APP ] Server running on http://${HOST}:${PORT}`);
   });
 }
 
