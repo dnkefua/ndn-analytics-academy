@@ -152,7 +152,7 @@ export const CertificateEvidence: React.FC<CertificateEvidenceProps> = ({
   const shareText = `I earned the "${certificate.title}" professional certificate at NDN Analytics Academy (${certificate.cpdCredits} CPD credits). Verification: ${certificate.verificationId}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto print:p-0 print:bg-white print:items-start">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto print:p-0 print:bg-white">
       {/* Print isolation: only the certificate prints, in landscape */}
       <style>{`
         @media print {
