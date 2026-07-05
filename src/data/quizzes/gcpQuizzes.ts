@@ -56,6 +56,126 @@ export const GCP_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "Regions & Zones", url: "https://cloud.google.com/compute/docs/regions-zones", type: "docs" }]
   },
 
+  {
+    id: "quiz-gcp-1-q4",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What is the correct order of the GCP resource hierarchy from top to bottom?",
+    options: [
+      { key: "A", text: "Project → Organization → Folder → Resource." },
+      { key: "B", text: "Organization → Folder → Project → Resource." },
+      { key: "C", text: "Folder → Project → Organization → Resource." },
+      { key: "D", text: "Resource → Project → Folder → Organization." }
+    ],
+    correctAnswer: "B",
+    explanation: "The hierarchy is Organization → Folder → Project → Resource; IAM policies and billing flow down this tree.",
+    technicalResources: [{ name: "Resource Hierarchy", url: "https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-1-q5",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the difference between a GCP region and a zone?",
+    options: [
+      { key: "A", text: "They are the same thing." },
+      { key: "B", text: "A region is a geographic area containing multiple zones; a zone is an isolated failure domain within it." },
+      { key: "C", text: "A zone contains multiple regions." },
+      { key: "D", text: "A region is only for storage." }
+    ],
+    correctAnswer: "B",
+    explanation: "Regions group zones; each zone fails independently. Regional services replicate across zones automatically for resilience.",
+    technicalResources: [{ name: "Regions & Zones", url: "https://cloud.google.com/compute/docs/regions-zones", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-1-q6",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Serverless products like Cloud Run live outside your VPC by default. How do they reach a private-IP Cloud SQL instance?",
+    options: [
+      { key: "A", text: "They cannot." },
+      { key: "B", text: "Via a Serverless VPC Access connector that bridges their egress into the VPC." },
+      { key: "C", text: "By making the database public." },
+      { key: "D", text: "Through Firebase Hosting." }
+    ],
+    correctAnswer: "B",
+    explanation: "A Serverless VPC connector routes serverless egress into your VPC so services can reach private resources like Cloud SQL or Memorystore.",
+    technicalResources: [{ name: "VPC Overview", url: "https://cloud.google.com/vpc/docs/vpc", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-1-q7",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "In a custom-mode VPC, how are subnets created?",
+    options: [
+      { key: "A", text: "Google auto-creates one subnet per region." },
+      { key: "B", text: "You create every subnet explicitly with a chosen region and IP range." },
+      { key: "C", text: "Subnets are not allowed." },
+      { key: "D", text: "One global subnet is created automatically." }
+    ],
+    correctAnswer: "B",
+    explanation: "Custom-mode VPCs give you full control: you define each regional subnet and its CIDR range explicitly, unlike auto-mode.",
+    technicalResources: [{ name: "VPC Networks", url: "https://cloud.google.com/vpc/docs/vpc", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-1-q8",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "architecture_scenario",
+    difficulty: "medium",
+    question: "What is the primary reason to keep prod and dev in separate projects rather than a shared one?",
+    options: [
+      { key: "A", text: "Lower cost." },
+      { key: "B", text: "The project is the isolation unit for IAM, quotas, billing, and blast radius — a dev mistake can't touch prod resources." },
+      { key: "C", text: "Faster networking." },
+      { key: "D", text: "It is required by Terraform." }
+    ],
+    correctAnswer: "B",
+    explanation: "Isolating by project makes access reviews, budgets, quota limits, and accidental-deletion blast radius trivial to reason about.",
+    technicalResources: [{ name: "Project Best Practices", url: "https://cloud.google.com/resource-manager/docs/best-practices-projects", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-1-q9",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "GCP firewall rules are stateful and target resources by what?",
+    options: [
+      { key: "A", text: "MAC address only." },
+      { key: "B", text: "Network tags or service accounts (plus source ranges)." },
+      { key: "C", text: "Hostname only." },
+      { key: "D", text: "Random assignment." }
+    ],
+    correctAnswer: "B",
+    explanation: "VPC firewall rules match on source ranges and target tags or service accounts, letting you scope traffic to specific workloads.",
+    technicalResources: [{ name: "Firewall Rules", url: "https://cloud.google.com/vpc/docs/firewalls", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-1-q10",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-1",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why express infrastructure as gcloud commands (and later Terraform) rather than only Console clicks?",
+    options: [
+      { key: "A", text: "The Console is deprecated." },
+      { key: "B", text: "Only scriptable/declarative infrastructure can be reliably automated, reviewed, and reproduced across environments." },
+      { key: "C", text: "gcloud is faster to type." },
+      { key: "D", text: "Console clicks aren't logged." }
+    ],
+    correctAnswer: "B",
+    explanation: "If infrastructure exists only as console clicks it can't be automated or reproduced; commands and IaC make it repeatable and reviewable.",
+    technicalResources: [{ name: "gcloud Cheat Sheet", url: "https://cloud.google.com/sdk/docs/cheatsheet", type: "docs" }]
+  },
+
   // ── Module 2 ──
   {
     id: "quiz-gcp-2-q1",
@@ -111,6 +231,127 @@ export const GCP_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "Build Cache Optimization", url: "https://docs.docker.com/build/cache/", type: "docs" }]
   },
 
+  {
+    id: "quiz-gcp-2-q4",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why prefer `npm ci` over `npm install` in a Docker build?",
+    options: [
+      { key: "A", text: "It is slower but prettier." },
+      { key: "B", text: "npm ci installs byte-exact versions from the lockfile, giving reproducible builds." },
+      { key: "C", text: "It skips dependencies." },
+      { key: "D", text: "It edits package.json." }
+    ],
+    correctAnswer: "B",
+    explanation: "npm ci performs a clean, lockfile-exact install, making container builds deterministic — critical for reproducibility.",
+    technicalResources: [{ name: "Node Docker Best Practices", url: "https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md", type: "article" }]
+  },
+  {
+    id: "quiz-gcp-2-q5",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does adding USER node before CMD accomplish in a Dockerfile?",
+    options: [
+      { key: "A", text: "Nothing; it's cosmetic." },
+      { key: "B", text: "It runs the process as non-root, so a container escape is far less valuable to an attacker." },
+      { key: "C", text: "It speeds up the build." },
+      { key: "D", text: "It installs Node." }
+    ],
+    correctAnswer: "B",
+    explanation: "Running as a non-root user limits the impact of a container compromise — a standard hardening step.",
+    technicalResources: [{ name: "Docker Best Practices", url: "https://docs.docker.com/build/building/best-practices/", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-2-q6",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why should you tag production images with a semantic version or git SHA instead of :latest?",
+    options: [
+      { key: "A", text: ":latest compresses better." },
+      { key: "B", text: "Immutable version/SHA tags make deployments traceable to exact source commits; :latest is a moving pointer you can't audit." },
+      { key: "C", text: "Cloud Run rejects versions." },
+      { key: "D", text: "It has no effect." }
+    ],
+    correctAnswer: "B",
+    explanation: "SHA/version tags let you answer 'what is running?' deterministically and roll back precisely; :latest destroys traceability.",
+    technicalResources: [{ name: "Artifact Registry Names", url: "https://cloud.google.com/artifact-registry/docs/docker/names", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-2-q7",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What belongs in a .dockerignore file for a Node app?",
+    options: [
+      { key: "A", text: "The Dockerfile itself." },
+      { key: "B", text: "node_modules, .git, and .env* — so secrets and bloat never enter image layers." },
+      { key: "C", text: "package.json." },
+      { key: "D", text: "The dist folder you need at runtime." }
+    ],
+    correctAnswer: "B",
+    explanation: "Excluding node_modules, git history, and env files keeps images small and prevents secrets from being baked into extractable layers.",
+    technicalResources: [{ name: "Dockerignore", url: "https://docs.docker.com/build/concepts/context/#dockerignore-files", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-2-q8",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "code_output",
+    difficulty: "hard",
+    question: "In `COPY --from=build /app/dist ./dist`, what does --from reference?",
+    codeSnippet: `FROM node:22-slim AS build\n# ...\nFROM node:22-slim AS runtime\nCOPY --from=build /app/dist ./dist`,
+    options: [
+      { key: "A", text: "A remote registry image." },
+      { key: "B", text: "An earlier named build stage; it copies artifacts out of that discarded stage into the final image." },
+      { key: "C", text: "The host filesystem." },
+      { key: "D", text: "A volume mount." }
+    ],
+    correctAnswer: "B",
+    explanation: "COPY --from=<stage> is the only bridge between multi-stage builds; only what you copy into the final stage ships.",
+    technicalResources: [{ name: "Multi-Stage Builds", url: "https://docs.docker.com/build/building/multi-stage/", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-2-q9",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What feature of Artifact Registry helps you catch vulnerable base image layers?",
+    options: [
+      { key: "A", text: "Auto-scaling." },
+      { key: "B", text: "Built-in vulnerability (CVE) scanning on the repository." },
+      { key: "C", text: "Traffic splitting." },
+      { key: "D", text: "DNS management." }
+    ],
+    correctAnswer: "B",
+    explanation: "Artifact Registry can scan images for known CVEs in their layers, surfacing vulnerabilities before they reach production.",
+    technicalResources: [{ name: "Artifact Analysis", url: "https://cloud.google.com/artifact-registry/docs/analysis", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-2-q10",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-2",
+    type: "debugging",
+    difficulty: "medium",
+    question: "Every source change forces a full `npm ci` in the Docker build. What reordering fixes the cache miss?",
+    options: [
+      { key: "A", text: "Use npm install instead." },
+      { key: "B", text: "COPY package*.json and run npm ci BEFORE copying the rest of the source, isolating deps into a stable cached layer." },
+      { key: "C", text: "Add --no-cache." },
+      { key: "D", text: "Move WORKDIR to the end." }
+    ],
+    correctAnswer: "B",
+    explanation: "Docker invalidates all layers after the first change. Copying lockfiles and installing before the source keeps the dependency layer cached across code edits.",
+    technicalResources: [{ name: "Build Cache", url: "https://docs.docker.com/build/cache/", type: "docs" }]
+  },
+
   // ── Module 3 ──
   {
     id: "quiz-gcp-3-q1",
@@ -164,6 +405,126 @@ export const GCP_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "VPC Connect", url: "https://cloud.google.com/run/docs/configuring/connecting-vpc", type: "docs" }]
   },
 
+  {
+    id: "quiz-gcp-3-q4",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the approximate relationship between concurrency and instance count on Cloud Run?",
+    options: [
+      { key: "A", text: "instances = concurrency." },
+      { key: "B", text: "instances ≈ ceil(concurrent_requests / concurrency), bounded by max-instances." },
+      { key: "C", text: "instances are fixed at 1." },
+      { key: "D", text: "instances = requests per second." }
+    ],
+    correctAnswer: "B",
+    explanation: "Concurrency is per-instance parallelism; the autoscaler adds instances as concurrent requests exceed capacity, up to max-instances.",
+    technicalResources: [{ name: "Autoscaling", url: "https://cloud.google.com/run/docs/about-instance-autoscaling", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-3-q5",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why lower concurrency (e.g. to ~8) for a memory-heavy PDF-rendering endpoint?",
+    options: [
+      { key: "A", text: "To reduce billing per request." },
+      { key: "B", text: "So each instance handles fewer simultaneous heavy requests, preventing OOM; capacity comes from horizontal scaling instead." },
+      { key: "C", text: "Cloud Run requires it for binaries." },
+      { key: "D", text: "It disables cold starts." }
+    ],
+    correctAnswer: "B",
+    explanation: "High per-request memory means fewer concurrent requests per instance. Lowering concurrency protects the instance; the autoscaler adds more instances.",
+    technicalResources: [{ name: "About Concurrency", url: "https://cloud.google.com/run/docs/about-concurrency", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-3-q6",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does deploying with `--no-traffic --tag=canary` achieve?",
+    options: [
+      { key: "A", text: "It deletes the old revision." },
+      { key: "B", text: "It creates the revision without sending user traffic and gives it a dedicated URL for pre-traffic smoke tests." },
+      { key: "C", text: "It sends 100% of traffic immediately." },
+      { key: "D", text: "It rolls back." }
+    ],
+    correctAnswer: "B",
+    explanation: "--no-traffic keeps the revision unexposed; the tag provides a private URL to validate before shifting any real traffic.",
+    technicalResources: [{ name: "Rollouts & Traffic", url: "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-3-q7",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "How do you roll back an unhealthy Cloud Run release instantly?",
+    options: [
+      { key: "A", text: "Rebuild the previous image from scratch." },
+      { key: "B", text: "Reassign 100% traffic to the last good revision with update-traffic — no rebuild needed." },
+      { key: "C", text: "Delete the service." },
+      { key: "D", text: "Wait for auto-recovery." }
+    ],
+    correctAnswer: "B",
+    explanation: "Because revisions are immutable, rollback is just shifting traffic back to a known-good revision — an instant operation.",
+    technicalResources: [{ name: "Rollbacks", url: "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-3-q8",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "How are secrets provided to a Cloud Run service at runtime?",
+    options: [
+      { key: "A", text: "Baked into the image." },
+      { key: "B", text: "Mounted from Secret Manager via --set-secrets, never stored in the image." },
+      { key: "C", text: "Hardcoded in the Dockerfile." },
+      { key: "D", text: "Passed as URL query params." }
+    ],
+    correctAnswer: "B",
+    explanation: "Cloud Run injects Secret Manager secrets at runtime with --set-secrets, keeping them out of images and source.",
+    technicalResources: [{ name: "Cloud Run Secrets", url: "https://cloud.google.com/run/docs/configuring/services/secrets", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-3-q9",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why set min-instances to 1 on a latency-critical user-facing API?",
+    options: [
+      { key: "A", text: "To cap costs." },
+      { key: "B", text: "To keep one instance warm, eliminating cold-start latency for the first request." },
+      { key: "C", text: "To limit concurrency." },
+      { key: "D", text: "To disable autoscaling." }
+    ],
+    correctAnswer: "B",
+    explanation: "min-instances keeps warm capacity ready so users don't pay the cold-start penalty, for a small monthly cost.",
+    technicalResources: [{ name: "Autoscaling", url: "https://cloud.google.com/run/docs/about-instance-autoscaling", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-3-q10",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-3",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "Why must Cloud Run instances be stateless?",
+    options: [
+      { key: "A", text: "To save memory." },
+      { key: "B", text: "Because instances are created and destroyed by autoscaling, any instance must be able to serve any request; state belongs in a database/cache." },
+      { key: "C", text: "Stateful containers are illegal." },
+      { key: "D", text: "To enable logging." }
+    ],
+    correctAnswer: "B",
+    explanation: "Autoscaling and scale-to-zero mean instances are ephemeral. Persist anything you need across requests in Firestore, Cloud SQL, or Memorystore.",
+    technicalResources: [{ name: "Container Contract", url: "https://cloud.google.com/run/docs/container-contract", type: "docs" }]
+  },
+
   // ── Module 4 ──
   {
     id: "quiz-gcp-4-q1",
@@ -215,6 +576,126 @@ export const GCP_QUIZZES: QuizQuestion[] = [
     correctAnswer: ["A", "B", "D"],
     explanation: "Per-secret grants + versioned rotation are the model. Cloud Run mounts secrets at runtime (not baked into images) — that separation is the entire point.",
     technicalResources: [{ name: "Secret Manager Best Practices", url: "https://cloud.google.com/secret-manager/docs/best-practices", type: "docs" }]
+  },
+
+  {
+    id: "quiz-gcp-4-q4",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What are the three parts of an IAM binding?",
+    options: [
+      { key: "A", text: "User, password, resource." },
+      { key: "B", text: "Member (principal) + Role + Resource." },
+      { key: "C", text: "Project, region, zone." },
+      { key: "D", text: "Key, value, scope." }
+    ],
+    correctAnswer: "B",
+    explanation: "An IAM binding grants a member a role on a resource. Effective access is the union of all bindings up the hierarchy.",
+    technicalResources: [{ name: "IAM Overview", url: "https://cloud.google.com/iam/docs/overview", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-4-q5",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why avoid the basic roles (owner/editor/viewer) in production?",
+    options: [
+      { key: "A", text: "They cost more." },
+      { key: "B", text: "They are project-wide and enormously broad; predefined roles at the narrowest scope enforce least privilege." },
+      { key: "C", text: "They are deprecated entirely." },
+      { key: "D", text: "They only work in dev." }
+    ],
+    correctAnswer: "B",
+    explanation: "Basic roles grant sweeping project-wide power. Least privilege uses predefined (or custom) roles scoped to specific resources.",
+    technicalResources: [{ name: "Using IAM Securely", url: "https://cloud.google.com/iam/docs/using-iam-securely", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-4-q6",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the risk of the default Compute service account?",
+    options: [
+      { key: "A", text: "It has no permissions." },
+      { key: "B", text: "It holds Editor on the whole project — a skeleton key; replace it with a dedicated least-privilege account per service." },
+      { key: "C", text: "It expires hourly." },
+      { key: "D", text: "It cannot be used by Cloud Run." }
+    ],
+    correctAnswer: "B",
+    explanation: "The default account's project-wide Editor role means a service compromise leaks everything. Give each service its own narrowly-scoped account.",
+    technicalResources: [{ name: "Service Accounts", url: "https://cloud.google.com/iam/docs/service-account-overview", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-4-q7",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "How does an app running on GCP obtain credentials without a JSON key file?",
+    options: [
+      { key: "A", text: "It hardcodes a password." },
+      { key: "B", text: "Via the attached service account and the metadata server (Application Default Credentials)." },
+      { key: "C", text: "It downloads a key at startup." },
+      { key: "D", text: "It cannot without a key." }
+    ],
+    correctAnswer: "B",
+    explanation: "On GCP, the attached service account provides short-lived credentials through the metadata server — no key files to leak or rotate.",
+    technicalResources: [{ name: "Application Default Credentials", url: "https://cloud.google.com/docs/authentication/application-default-credentials", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-4-q8",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "What is the #1 leaked credential on GitHub, and what should you use instead from CI?",
+    options: [
+      { key: "A", text: "Passwords; use 2FA." },
+      { key: "B", text: "Service account JSON keys; use Workload Identity Federation for keyless, short-lived credentials from GitHub Actions." },
+      { key: "C", text: "API keys; use cookies." },
+      { key: "D", text: "SSH keys; use FTP." }
+    ],
+    correctAnswer: "B",
+    explanation: "SA JSON keys leak constantly. Workload Identity Federation exchanges GitHub's OIDC token for short-lived GCP credentials — nothing stored to leak.",
+    technicalResources: [{ name: "Workload Identity Federation", url: "https://cloud.google.com/iam/docs/workload-identity-federation", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-4-q9",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "At what scope should the roles/secretmanager.secretAccessor role be granted?",
+    options: [
+      { key: "A", text: "Project-wide to all service accounts." },
+      { key: "B", text: "Per-secret, to the specific service account that needs it." },
+      { key: "C", text: "Organization-wide." },
+      { key: "D", text: "It is granted automatically." }
+    ],
+    correctAnswer: "B",
+    explanation: "Grant secretAccessor per-secret to the precise identity that reads it, never project-wide — the narrowest scope that works.",
+    technicalResources: [{ name: "Secret Manager Best Practices", url: "https://cloud.google.com/secret-manager/docs/best-practices", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-4-q10",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-4",
+    type: "debugging",
+    difficulty: "medium",
+    question: "You need to prove a second identity is denied a secret, without creating keys. Which technique?",
+    options: [
+      { key: "A", text: "Delete the secret." },
+      { key: "B", text: "Use --impersonate-service-account to act as the other identity and confirm PERMISSION_DENIED." },
+      { key: "C", text: "Grant it owner temporarily." },
+      { key: "D", text: "Restart the service." }
+    ],
+    correctAnswer: "B",
+    explanation: "Service account impersonation lets you run a negative test as another identity without minting or storing any key.",
+    technicalResources: [{ name: "SA Impersonation", url: "https://cloud.google.com/iam/docs/service-account-impersonation", type: "docs" }]
   },
 
   // ── Module 5 ──
@@ -271,6 +752,127 @@ export const GCP_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "Lifecycle Meta-Arguments", url: "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle", type: "docs" }]
   },
 
+  {
+    id: "quiz-gcp-5-q4",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the fundamental difference between Terraform and imperative gcloud scripting?",
+    options: [
+      { key: "A", text: "Terraform is slower." },
+      { key: "B", text: "Terraform is declarative — you describe the desired end state and it computes the diff (plan) to reach it." },
+      { key: "C", text: "gcloud is declarative; Terraform is imperative." },
+      { key: "D", text: "There is no difference." }
+    ],
+    correctAnswer: "B",
+    explanation: "Terraform declares end state and derives the change set. That plan is what makes infrastructure reviewable like code.",
+    technicalResources: [{ name: "Terraform Intro", url: "https://developer.hashicorp.com/terraform/intro", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-5-q5",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "Why must Terraform state live in a remote backend (e.g. GCS) for a team?",
+    options: [
+      { key: "A", text: "Local state is faster." },
+      { key: "B", text: "State maps declared resources to real objects; a shared, locked, versioned backend prevents divergence and concurrent-apply corruption." },
+      { key: "C", text: "It stores the git history." },
+      { key: "D", text: "State is optional with good HCL." }
+    ],
+    correctAnswer: "B",
+    explanation: "Without shared state, two engineers' applies would each think they own reality. Remote, versioned, locked state is the collaboration contract.",
+    technicalResources: [{ name: "GCS Backend", url: "https://developer.hashicorp.com/terraform/language/backend/gcs", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-5-q6",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "In the Terraform workflow, what is `terraform plan`?",
+    options: [
+      { key: "A", text: "It applies changes immediately." },
+      { key: "B", text: "It computes and shows the diff (+ create, ~ change, - destroy) before you apply — review it like a code diff." },
+      { key: "C", text: "It downloads providers only." },
+      { key: "D", text: "It deletes state." }
+    ],
+    correctAnswer: "B",
+    explanation: "plan is the reviewable contract of exactly what apply will do. A surprise '- destroy' on a database is caught here.",
+    technicalResources: [{ name: "Terraform CLI", url: "https://developer.hashicorp.com/terraform/cli/commands/plan", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-5-q7",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "code_output",
+    difficulty: "medium",
+    question: "When resource B references google_service_account.a.email, what does Terraform guarantee?",
+    codeSnippet: `resource "google_cloud_run_v2_service" "b" {\n  template { service_account = google_service_account.a.email }\n}`,
+    options: [
+      { key: "A", text: "Alphabetical creation order." },
+      { key: "B", text: "The service account (a) is created before the service (b), via the implicit dependency edge from the reference." },
+      { key: "C", text: "Random order." },
+      { key: "D", text: "Both are created simultaneously." }
+    ],
+    correctAnswer: "B",
+    explanation: "Attribute references build Terraform's dependency graph, so referenced resources are created first without explicit depends_on.",
+    technicalResources: [{ name: "Resource Behavior", url: "https://developer.hashicorp.com/terraform/language/resources/behavior", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-5-q8",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "debugging",
+    difficulty: "hard",
+    question: "A plan shows '-/+ destroy and then create replacement' for your production database. What's the professional response?",
+    options: [
+      { key: "A", text: "Apply — Terraform knows best." },
+      { key: "B", text: "Stop; identify the ForceNew attribute, protect stateful resources with lifecycle prevent_destroy, and plan a migration before any apply." },
+      { key: "C", text: "Delete state and re-import." },
+      { key: "D", text: "Run apply -auto-approve." }
+    ],
+    correctAnswer: "B",
+    explanation: "Replacement means data loss on stateful resources. The plan gate exists for this moment — investigate before applying.",
+    technicalResources: [{ name: "Lifecycle", url: "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-5-q9",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does a Terraform module give you?",
+    options: [
+      { key: "A", text: "Faster networking." },
+      { key: "B", text: "A reusable, parameterized bundle of resources that encapsulates organizational standards as the default path." },
+      { key: "C", text: "Automatic secrets." },
+      { key: "D", text: "A GUI." }
+    ],
+    correctAnswer: "B",
+    explanation: "Modules package best practices (service account per service, required labels) so teams get them by default via variables and .tfvars per environment.",
+    technicalResources: [{ name: "Modules", url: "https://developer.hashicorp.com/terraform/language/modules", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-5-q10",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "How do you bring a pre-existing cloud resource under Terraform management?",
+    options: [
+      { key: "A", text: "Delete and recreate it." },
+      { key: "B", text: "terraform import, which writes the existing resource into state." },
+      { key: "C", text: "Hand-edit the state file." },
+      { key: "D", text: "It's impossible." }
+    ],
+    correctAnswer: "B",
+    explanation: "terraform import brings existing resources under management without recreating them — essential when adopting IaC on a legacy estate.",
+    technicalResources: [{ name: "Import", url: "https://developer.hashicorp.com/terraform/cli/import", type: "docs" }]
+  },
+
   // ── Module 6 ──
   {
     id: "quiz-gcp-6-q1",
@@ -322,5 +924,124 @@ export const GCP_QUIZZES: QuizQuestion[] = [
     correctAnswer: ["A", "B", "C"],
     explanation: "Tests gate builds, WIF eliminates stored keys, and smoke-gated promotion turns deploys into non-events. Stored JSON keys are the anti-pattern WIF replaces.",
     technicalResources: [{ name: "google-github-actions/auth", url: "https://github.com/google-github-actions/auth", type: "repo" }]
+  },
+  {
+    id: "quiz-gcp-6-q4",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What do CI and CD stand for in a deployment pipeline?",
+    options: [
+      { key: "A", text: "Code Integrity and Code Delivery." },
+      { key: "B", text: "Continuous Integration (test every change) and Continuous Deployment (ship every passing change)." },
+      { key: "C", text: "Container Image and Cloud Deploy." },
+      { key: "D", text: "Compile Instructions and Compile Directives." }
+    ],
+    correctAnswer: "B",
+    explanation: "CI tests every change automatically; CD deploys every change that passes — together an automated path from commit to production.",
+    technicalResources: [{ name: "Cloud Build Docs", url: "https://cloud.google.com/build/docs", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-6-q5",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "In a GitHub Actions workflow using Workload Identity Federation, which permission is required?",
+    options: [
+      { key: "A", text: "contents: write" },
+      { key: "B", text: "id-token: write — so GitHub can mint the OIDC token exchanged for GCP credentials." },
+      { key: "C", text: "packages: write" },
+      { key: "D", text: "issues: write" }
+    ],
+    correctAnswer: "B",
+    explanation: "WIF needs the workflow's id-token: write permission to obtain the OIDC token that GCP's identity pool verifies and exchanges.",
+    technicalResources: [{ name: "google-github-actions/auth", url: "https://github.com/google-github-actions/auth", type: "repo" }]
+  },
+  {
+    id: "quiz-gcp-6-q6",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "architecture_scenario",
+    difficulty: "hard",
+    question: "During a zero-downtime rollout, old and new revisions serve simultaneously. Your release renames a Firestore field the old code still reads. What pattern avoids breakage?",
+    options: [
+      { key: "A", text: "Deploy faster." },
+      { key: "B", text: "Expand–migrate–contract: ship code writing BOTH fields, backfill, then remove the old field once no serving revision reads it." },
+      { key: "C", text: "Schedule downtime." },
+      { key: "D", text: "Firestore handles renames automatically." }
+    ],
+    correctAnswer: "B",
+    explanation: "Overlapping revisions require backwards-compatible changes. Expand-migrate-contract sequences the change so no revision ever reads a missing field.",
+    technicalResources: [{ name: "Migration Concepts", url: "https://cloud.google.com/architecture/database-migration-concepts-principles-part-1", type: "article" }]
+  },
+  {
+    id: "quiz-gcp-6-q7",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why tag pipeline-built images with the git SHA?",
+    options: [
+      { key: "A", text: "For smaller images." },
+      { key: "B", text: "So any running revision maps to an exact source commit, making diagnosis and rollback deterministic." },
+      { key: "C", text: "Cloud Build requires it." },
+      { key: "D", text: "For vulnerability scanning." }
+    ],
+    correctAnswer: "B",
+    explanation: "SHA tags make 'which commit is running?' answerable at a glance and rollbacks exact — unlike the moving :latest tag.",
+    technicalResources: [{ name: "Cloud Run CD", url: "https://cloud.google.com/run/docs/continuous-deployment-with-cloud-build", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-6-q8",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the purpose of a smoke-test step against a tagged, traffic-less revision before promotion?",
+    options: [
+      { key: "A", text: "To warm the cache." },
+      { key: "B", text: "To gate promotion — if the tagged URL fails a basic check (curl -f), the pipeline stops before shifting real traffic." },
+      { key: "C", text: "To generate logs." },
+      { key: "D", text: "It has no effect." }
+    ],
+    correctAnswer: "B",
+    explanation: "A failing smoke test on the canary URL halts the pipeline before users are exposed. A gate that can't fail is theater.",
+    technicalResources: [{ name: "Cloud Build Triggers", url: "https://cloud.google.com/build/docs/triggers", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-6-q9",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why keep application deploys and infrastructure (Terraform) changes on separate pipelines?",
+    options: [
+      { key: "A", text: "To use more compute." },
+      { key: "B", text: "They are different machines with different identities: one ships revisions on merge, the other applies plans with plan-on-PR review." },
+      { key: "C", text: "GitHub requires it." },
+      { key: "D", text: "There's no reason to." }
+    ],
+    correctAnswer: "B",
+    explanation: "App and infra pipelines have distinct cadences, permissions, and review needs; separating them keeps each safe and auditable.",
+    technicalResources: [{ name: "Cloud Build Docs", url: "https://cloud.google.com/build/docs", type: "docs" }]
+  },
+  {
+    id: "quiz-gcp-6-q10",
+    courseId: "course-gcp-architecture",
+    moduleId: "mod-gcp-6",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "How can you avoid a full build-and-deploy on a docs-only commit?",
+    options: [
+      { key: "A", text: "You can't." },
+      { key: "B", text: "Add a path filter to the build trigger so only relevant file changes fire the pipeline." },
+      { key: "C", text: "Delete the trigger each time." },
+      { key: "D", text: "Commit less often." }
+    ],
+    correctAnswer: "B",
+    explanation: "Trigger path filters prevent unnecessary pipeline runs (and deploy noise/cost) for changes that don't affect the app.",
+    technicalResources: [{ name: "Cloud Build Triggers", url: "https://cloud.google.com/build/docs/triggers", type: "docs" }]
   }
 ];

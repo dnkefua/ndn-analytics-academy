@@ -57,6 +57,127 @@ export const DATA_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "JOBS Views", url: "https://cloud.google.com/bigquery/docs/information-schema-jobs", type: "docs" }]
   },
 
+  {
+    id: "quiz-data-1-q4",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "Because BigQuery uses columnar storage, on-demand queries are billed by what?",
+    options: [
+      { key: "A", text: "Rows returned." },
+      { key: "B", text: "Bytes scanned in the referenced columns." },
+      { key: "C", text: "Number of queries per day." },
+      { key: "D", text: "Result set size." }
+    ],
+    correctAnswer: "B",
+    explanation: "Columnar storage reads only referenced columns, and on-demand pricing bills the bytes scanned — which is why SELECT * is a billing decision.",
+    technicalResources: [{ name: "Pricing", url: "https://cloud.google.com/bigquery/pricing", type: "docs" }]
+  },
+  {
+    id: "quiz-data-1-q5",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "code_output",
+    difficulty: "medium",
+    question: "Does adding LIMIT 10 to a SELECT reduce the bytes scanned?",
+    codeSnippet: `SELECT * FROM ndn.analytics.events LIMIT 10;`,
+    options: [
+      { key: "A", text: "Yes, only 10 rows are read." },
+      { key: "B", text: "No — the engine reads the referenced columns in full before applying LIMIT." },
+      { key: "C", text: "Only if there's an index." },
+      { key: "D", text: "LIMIT makes the query free." }
+    ],
+    correctAnswer: "B",
+    explanation: "LIMIT caps output rows but not the scan; the columns are read fully (modulo partition pruning) before limiting.",
+    technicalResources: [{ name: "On-Demand Pricing", url: "https://cloud.google.com/bigquery/pricing#on_demand_pricing", type: "docs" }]
+  },
+  {
+    id: "quiz-data-1-q6",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Which dataset property is immutable at creation and affects cross-dataset joins?",
+    options: [
+      { key: "A", text: "The description." },
+      { key: "B", text: "The region/location — you can't join across regions, so placement is a day-one decision." },
+      { key: "C", text: "The table count." },
+      { key: "D", text: "Default expiration." }
+    ],
+    correctAnswer: "B",
+    explanation: "Dataset location is permanent and queries can't join across regions; co-locate datasets that must join, near their consumers.",
+    technicalResources: [{ name: "Dataset Locations", url: "https://cloud.google.com/bigquery/docs/locations", type: "docs" }]
+  },
+  {
+    id: "quiz-data-1-q7",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What are slots in BigQuery?",
+    options: [
+      { key: "A", text: "Storage buckets." },
+      { key: "B", text: "Units of query compute that BigQuery parallelizes work across automatically." },
+      { key: "C", text: "IAM roles." },
+      { key: "D", text: "Table partitions." }
+    ],
+    correctAnswer: "B",
+    explanation: "Queries compile into stages executed by slots; on-demand gives a shared pool, editions let you reserve capacity.",
+    technicalResources: [{ name: "Slots", url: "https://cloud.google.com/bigquery/docs/slots", type: "docs" }]
+  },
+  {
+    id: "quiz-data-1-q8",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the best day-one guardrail against a typo that scans terabytes?",
+    options: [
+      { key: "A", text: "Hope." },
+      { key: "B", text: "Set 'maximum bytes billed' so an over-large query fails instead of billing you." },
+      { key: "C", text: "Disable the query editor." },
+      { key: "D", text: "Only query on weekends." }
+    ],
+    correctAnswer: "B",
+    explanation: "A maximum-bytes-billed cap makes a runaway query fail rather than surprise-bill you — the single most valuable cost habit.",
+    technicalResources: [{ name: "Cost Controls", url: "https://cloud.google.com/bigquery/docs/custom-quotas", type: "docs" }]
+  },
+  {
+    id: "quiz-data-1-q9",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "How do you audit which users scanned the most bytes this week?",
+    options: [
+      { key: "A", text: "Open a support ticket." },
+      { key: "B", text: "Query INFORMATION_SCHEMA.JOBS, which exposes each job's user, bytes processed, and SQL." },
+      { key: "C", text: "Check Cloud Trace." },
+      { key: "D", text: "It's impossible." }
+    ],
+    correctAnswer: "B",
+    explanation: "The warehouse self-reports via INFORMATION_SCHEMA jobs views, making cost auditing an ordinary SQL query.",
+    technicalResources: [{ name: "JOBS Views", url: "https://cloud.google.com/bigquery/docs/information-schema-jobs", type: "docs" }]
+  },
+  {
+    id: "quiz-data-1-q10",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-1",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "Why does BigQuery's cheap storage vs. costly compute justify wide denormalized tables?",
+    options: [
+      { key: "A", text: "It doesn't; always normalize." },
+      { key: "B", text: "Storing a column twice costs pennies, while repeatedly joining at query time costs dollars in scans." },
+      { key: "C", text: "Storage is more expensive than compute." },
+      { key: "D", text: "Wide tables are illegal." }
+    ],
+    correctAnswer: "B",
+    explanation: "Storage is cheap and auto-tiers; compute (scanning) is the cost center, so denormalizing to avoid repeated joins is economical.",
+    technicalResources: [{ name: "Storage Pricing", url: "https://cloud.google.com/bigquery/pricing#storage", type: "docs" }]
+  },
+
   // ── Module 2 ──
   {
     id: "quiz-data-2-q1",
@@ -111,6 +232,126 @@ export const DATA_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "Clustered Tables", url: "https://cloud.google.com/bigquery/docs/clustered-tables", type: "docs" }]
   },
 
+  {
+    id: "quiz-data-2-q4",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does the QUALIFY clause let you do?",
+    options: [
+      { key: "A", text: "Rename columns." },
+      { key: "B", text: "Filter directly on window-function results without a wrapping subquery." },
+      { key: "C", text: "Create a table." },
+      { key: "D", text: "Grant permissions." }
+    ],
+    correctAnswer: "B",
+    explanation: "QUALIFY filters on window results inline (e.g. keep ROW_NUMBER() ... = 1), which is also the standard dedup idiom.",
+    technicalResources: [{ name: "QUALIFY", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/query-syntax#qualify_clause", type: "docs" }]
+  },
+  {
+    id: "quiz-data-2-q5",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does OPTIONS(require_partition_filter = TRUE) enforce on a partitioned table?",
+    options: [
+      { key: "A", text: "Queries must finish in one partition." },
+      { key: "B", text: "Queries lacking a partition-column filter fail, making accidental full-table scans impossible." },
+      { key: "C", text: "Streaming inserts are blocked." },
+      { key: "D", text: "Partitions expire in 60 days." }
+    ],
+    correctAnswer: "B",
+    explanation: "It's a guardrail: any query that would scan all partitions is rejected at parse time — your best defense on multi-TB event tables.",
+    technicalResources: [{ name: "Partitioned Tables", url: "https://cloud.google.com/bigquery/docs/partitioned-tables", type: "docs" }]
+  },
+  {
+    id: "quiz-data-2-q6",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "architecture_scenario",
+    difficulty: "hard",
+    question: "An events table is queried by date range + user_id, sometimes also event_name. Optimal physical design?",
+    options: [
+      { key: "A", text: "PARTITION BY DATE(event_timestamp), CLUSTER BY user_id, event_name — most-selective cluster column first." },
+      { key: "B", text: "CLUSTER BY date only." },
+      { key: "C", text: "PARTITION BY user_id." },
+      { key: "D", text: "No partitioning; BigQuery optimizes automatically." }
+    ],
+    correctAnswer: "A",
+    explanation: "Partitioning prunes by date (and enables require_partition_filter); clustering prunes blocks within partitions by the hot filter columns.",
+    technicalResources: [{ name: "Clustered Tables", url: "https://cloud.google.com/bigquery/docs/clustered-tables", type: "docs" }]
+  },
+  {
+    id: "quiz-data-2-q7",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What do window functions let you do that GROUP BY does not?",
+    options: [
+      { key: "A", text: "Nothing different." },
+      { key: "B", text: "Aggregate over a peer group (RANK, LAG, running SUM) without collapsing the underlying rows." },
+      { key: "C", text: "Delete rows." },
+      { key: "D", text: "Create indexes." }
+    ],
+    correctAnswer: "B",
+    explanation: "Window functions compute over a partition while keeping every row — enabling rankings, offsets, and running totals inline.",
+    technicalResources: [{ name: "Window Functions", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/window-function-calls", type: "docs" }]
+  },
+  {
+    id: "quiz-data-2-q8",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "How does UNNEST relate to an ARRAY column?",
+    options: [
+      { key: "A", text: "It deletes the array." },
+      { key: "B", text: "It expands array elements into joinable rows, so you can filter or aggregate nested data." },
+      { key: "C", text: "It compresses the array." },
+      { key: "D", text: "It renames the column." }
+    ],
+    correctAnswer: "B",
+    explanation: "ARRAY/STRUCT store nested data; UNNEST turns array elements back into rows, letting one wide nested table replace a star schema.",
+    technicalResources: [{ name: "Arrays", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/arrays", type: "docs" }]
+  },
+  {
+    id: "quiz-data-2-q9",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "You see 'bytes shuffled' spike on a JOIN stage in execution details. Likely cause and fix?",
+    options: [
+      { key: "A", text: "Too many columns; add more." },
+      { key: "B", text: "You joined before filtering — push the WHERE into a CTE ahead of the join to shrink the join inputs." },
+      { key: "C", text: "The table needs an index." },
+      { key: "D", text: "Nothing can be done." }
+    ],
+    correctAnswer: "B",
+    explanation: "High shuffle on a join usually means unfiltered inputs. Filtering in a CTE before the join reduces the data shuffled.",
+    technicalResources: [{ name: "Query Plan", url: "https://cloud.google.com/bigquery/docs/query-plan-explanation", type: "docs" }]
+  },
+  {
+    id: "quiz-data-2-q10",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-2",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is a materialized view good for?",
+    options: [
+      { key: "A", text: "Storing secrets." },
+      { key: "B", text: "Precomputing repeated dashboard aggregates; it auto-refreshes and BigQuery substitutes it into matching queries." },
+      { key: "C", text: "Replacing IAM." },
+      { key: "D", text: "Encrypting tables." }
+    ],
+    correctAnswer: "B",
+    explanation: "Materialized views precompute and auto-refresh common aggregations, and the optimizer substitutes them into matching queries automatically.",
+    technicalResources: [{ name: "Materialized Views", url: "https://cloud.google.com/bigquery/docs/materialized-views-intro", type: "docs" }]
+  },
+
   // ── Module 3 ──
   {
     id: "quiz-data-3-q1",
@@ -162,6 +403,126 @@ export const DATA_QUIZZES: QuizQuestion[] = [
     correctAnswer: "B",
     explanation: "Analytics is about change over time. The append-only changelog captures history exactly once, and a QUALIFY-latest view reconstructs 'now' whenever needed.",
     technicalResources: [{ name: "Stream Firestore to BigQuery", url: "https://extensions.dev/extensions/firebase/firestore-bigquery-export", type: "docs" }]
+  },
+
+  {
+    id: "quiz-data-3-q4",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why is ELT (not ETL) dominant on BigQuery?",
+    options: [
+      { key: "A", text: "Transformation tools don't exist for GCP." },
+      { key: "B", text: "Loading raw is cheap/free (GCS batch loads), and versioned in-warehouse SQL transforms are reproducible from raw at any time." },
+      { key: "C", text: "ELT avoids all data-quality issues." },
+      { key: "D", text: "BigQuery can't ingest transformed data." }
+    ],
+    correctAnswer: "B",
+    explanation: "Raw-first landing preserves optionality; transform bugs are fixable by re-running SQL over immutable raw data, and batch loads cost nothing.",
+    technicalResources: [{ name: "Batch Loading", url: "https://cloud.google.com/bigquery/docs/batch-loading-data", type: "docs" }]
+  },
+  {
+    id: "quiz-data-3-q5",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "Which load format hierarchy is best for correctness and compression?",
+    options: [
+      { key: "A", text: "CSV > JSON > Parquet." },
+      { key: "B", text: "Parquet/Avro > JSONL > CSV, because self-describing schema and types avoid parsing bugs." },
+      { key: "C", text: "Only CSV is supported." },
+      { key: "D", text: "Format doesn't matter." }
+    ],
+    correctAnswer: "B",
+    explanation: "Parquet/Avro carry schema and types and compress well; CSV is where date-parsing and type bugs breed.",
+    technicalResources: [{ name: "Loading Data", url: "https://cloud.google.com/bigquery/docs/loading-data", type: "docs" }]
+  },
+  {
+    id: "quiz-data-3-q6",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "debugging",
+    difficulty: "hard",
+    question: "A nightly load re-ran after a timeout and doubled yesterday's partition. Which design prevents this?",
+    options: [
+      { key: "A", text: "Never re-run jobs." },
+      { key: "B", text: "Idempotent loads: WRITE_TRUNCATE scoped to the target date partition, so re-runs replace instead of append." },
+      { key: "C", text: "Add DISTINCT to every downstream query." },
+      { key: "D", text: "Load into a new table nightly." }
+    ],
+    correctAnswer: "B",
+    explanation: "Partition-scoped truncate-and-write makes re-runs safe by construction; downstream DISTINCT band-aids cost every query forever.",
+    technicalResources: [{ name: "Write Dispositions", url: "https://cloud.google.com/bigquery/docs/loading-data-cloud-storage-parquet", type: "docs" }]
+  },
+  {
+    id: "quiz-data-3-q7",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why does the Firestore→BigQuery streaming extension write a changelog table rather than mirroring current state?",
+    options: [
+      { key: "A", text: "It uses less storage." },
+      { key: "B", text: "It preserves every historical state, enabling time-series/funnel analysis Firestore itself can't answer; current state is a view over the log." },
+      { key: "C", text: "BigQuery can't store current-state tables." },
+      { key: "D", text: "It avoids IAM." }
+    ],
+    correctAnswer: "B",
+    explanation: "The append-only changelog captures history exactly once; a QUALIFY-latest view reconstructs 'now' whenever needed.",
+    technicalResources: [{ name: "Firestore→BigQuery", url: "https://extensions.dev/extensions/firebase/firestore-bigquery-export", type: "docs" }]
+  },
+  {
+    id: "quiz-data-3-q8",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the point of a GCS landing-zone layout like source/dt=YYYY-MM-DD/?",
+    options: [
+      { key: "A", text: "It looks tidy." },
+      { key: "B", text: "Date-prefixed zones make loads scriptable, idempotent, and reprocessable per day." },
+      { key: "C", text: "It encrypts data." },
+      { key: "D", text: "It's required by BigQuery." }
+    ],
+    correctAnswer: "B",
+    explanation: "A disciplined date-partitioned landing layout is what makes loads repeatable and lets you reprocess a single day cleanly.",
+    technicalResources: [{ name: "GCS Docs", url: "https://cloud.google.com/storage/docs", type: "docs" }]
+  },
+  {
+    id: "quiz-data-3-q9",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What implements the 'T' in ELT on BigQuery?",
+    options: [
+      { key: "A", text: "A separate Spark cluster." },
+      { key: "B", text: "Scheduled queries (or Dataform) that transform raw into clean tables with versioned SQL." },
+      { key: "C", text: "Manual copy-paste." },
+      { key: "D", text: "The client SDK." }
+    ],
+    correctAnswer: "B",
+    explanation: "Scheduled queries or Dataform run the in-warehouse transforms; raw stays raw and every transform is reproducible from it.",
+    technicalResources: [{ name: "Scheduled Queries", url: "https://cloud.google.com/bigquery/docs/scheduling-queries", type: "docs" }]
+  },
+  {
+    id: "quiz-data-3-q10",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-3",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why alert on row-count deltas versus a rolling average for pipeline tables?",
+    options: [
+      { key: "A", text: "To reduce storage." },
+      { key: "B", text: "A silent half-empty load keeps dashboards 'working' while being wrong; anomaly checks catch partial loads loudly." },
+      { key: "C", text: "It speeds up queries." },
+      { key: "D", text: "It's cosmetic." }
+    ],
+    correctAnswer: "B",
+    explanation: "Silent partial loads are the most expensive data bug because everything keeps rendering. Row-count anomaly checks surface them.",
+    technicalResources: [{ name: "Dataform", url: "https://cloud.google.com/dataform/docs", type: "docs" }]
   },
 
   // ── Module 4 ──
@@ -218,6 +579,127 @@ export const DATA_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "ML.PREDICT", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-predict", type: "docs" }]
   },
 
+  {
+    id: "quiz-data-4-q4",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What is the headline capability of BigQuery ML?",
+    options: [
+      { key: "A", text: "It replaces SQL." },
+      { key: "B", text: "It trains and serves ML models where the data lives, using CREATE MODEL and ML.PREDICT in pure SQL." },
+      { key: "C", text: "It only visualizes data." },
+      { key: "D", text: "It's a notebook environment." }
+    ],
+    correctAnswer: "B",
+    explanation: "BQML trains models in-warehouse via SQL — no export or Python cluster for the first mile of tabular prediction.",
+    technicalResources: [{ name: "BQML Intro", url: "https://cloud.google.com/bigquery/docs/bqml-introduction", type: "docs" }]
+  },
+  {
+    id: "quiz-data-4-q5",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "architecture_scenario",
+    difficulty: "hard",
+    question: "A pass-prediction model on first-week features reports roc_auc = 0.99. Your reaction?",
+    options: [
+      { key: "A", text: "Celebrate and deploy." },
+      { key: "B", text: "Suspect data leakage: audit every feature for information unavailable at prediction time — near-perfect scores on human behavior are a red flag." },
+      { key: "C", text: "Train more epochs to reach 1.0." },
+      { key: "D", text: "Switch to a neural net." }
+    ],
+    correctAnswer: "B",
+    explanation: "Leakage — training on the future — is the #1 way to build useless models. Audit each feature: knowable at the moment you'd predict?",
+    technicalResources: [{ name: "Data Leakage", url: "https://developers.google.com/machine-learning/crash-course/overfitting/data-leakage", type: "article" }]
+  },
+  {
+    id: "quiz-data-4-q6",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "With a 90% base pass rate, a model scores accuracy 0.90. What does that tell you?",
+    options: [
+      { key: "A", text: "The model is excellent." },
+      { key: "B", text: "Possibly nothing — always-predict-pass also scores 0.90. Judge with roc_auc and recall on the minority class." },
+      { key: "C", text: "Accuracy is the standard metric; ship it." },
+      { key: "D", text: "It needs 10% more data." }
+    ],
+    correctAnswer: "B",
+    explanation: "Class imbalance makes accuracy near-meaningless. For interventions, recall on the failing class determines real-world value.",
+    technicalResources: [{ name: "ML.EVALUATE", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-evaluate", type: "docs" }]
+  },
+  {
+    id: "quiz-data-4-q7",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Which BQML model type is usually the strongest for tabular classification?",
+    options: [
+      { key: "A", text: "KMEANS." },
+      { key: "B", text: "BOOSTED_TREE_CLASSIFIER (XGBoost)." },
+      { key: "C", text: "ARIMA_PLUS." },
+      { key: "D", text: "LINEAR_REG." }
+    ],
+    correctAnswer: "B",
+    explanation: "Boosted trees typically win on tabular data; LINEAR/LOGISTIC_REG are baselines, KMEANS is clustering, ARIMA_PLUS is forecasting.",
+    technicalResources: [{ name: "CREATE MODEL", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create", type: "docs" }]
+  },
+  {
+    id: "quiz-data-4-q8",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "code_output",
+    difficulty: "medium",
+    question: "What does ML.PREDICT produce in a FROM clause?",
+    codeSnippet: `SELECT * FROM ML.PREDICT(MODEL ndn.ml.pass_predictor, (SELECT * FROM features))`,
+    options: [
+      { key: "A", text: "It retrains the model." },
+      { key: "B", text: "Batch predictions for the input rows — ML.PREDICT is a table function you can filter and store." },
+      { key: "C", text: "A syntax error." },
+      { key: "D", text: "The model's metrics." }
+    ],
+    correctAnswer: "B",
+    explanation: "ML.PREDICT scores any feature table via SQL; scheduled nightly, it IS production batch serving.",
+    technicalResources: [{ name: "ML.PREDICT", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-predict", type: "docs" }]
+  },
+  {
+    id: "quiz-data-4-q9",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does ML.EXPLAIN_PREDICT add to a prediction?",
+    options: [
+      { key: "A", text: "It encrypts the output." },
+      { key: "B", text: "Per-row feature attributions, turning a score into an actionable reason (e.g. 'low active days')." },
+      { key: "C", text: "It retrains the model." },
+      { key: "D", text: "It deletes low-confidence rows." }
+    ],
+    correctAnswer: "B",
+    explanation: "Per-prediction explanations make a score actionable — 'at risk: low active days (−0.4), weak quiz average (−0.3)'.",
+    technicalResources: [{ name: "Explainable AI in BQML", url: "https://cloud.google.com/bigquery/docs/xai-overview", type: "docs" }]
+  },
+  {
+    id: "quiz-data-4-q10",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-4",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does data_split_method = 'AUTO_SPLIT' do during CREATE MODEL?",
+    options: [
+      { key: "A", text: "Deletes duplicate rows." },
+      { key: "B", text: "Holds out a portion of data for evaluation automatically." },
+      { key: "C", text: "Splits the table into partitions." },
+      { key: "D", text: "Encrypts the model." }
+    ],
+    correctAnswer: "B",
+    explanation: "AUTO_SPLIT reserves eval data so ML.EVALUATE reports honest held-out metrics rather than training-set performance.",
+    technicalResources: [{ name: "CREATE MODEL", url: "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create", type: "docs" }]
+  },
+
   // ── Module 5 ──
   {
     id: "quiz-data-5-q1",
@@ -271,6 +753,126 @@ export const DATA_QUIZZES: QuizQuestion[] = [
     technicalResources: [{ name: "Vertex Predictions", url: "https://cloud.google.com/vertex-ai/docs/predictions/get-predictions", type: "docs" }]
   },
 
+  {
+    id: "quiz-data-5-q4",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the difference between feature drift and prediction drift?",
+    options: [
+      { key: "A", text: "They are synonyms." },
+      { key: "B", text: "Feature drift = input distributions shift vs. training; prediction drift = the model's output distribution shifts." },
+      { key: "C", text: "Feature drift only affects neural networks." },
+      { key: "D", text: "Prediction drift is always a SQL bug." }
+    ],
+    correctAnswer: "B",
+    explanation: "Both are proxies for silent degradation detectable before ground truth arrives; monitor both (e.g. PSI > 0.2 alerts).",
+    technicalResources: [{ name: "Model Monitoring", url: "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview", type: "docs" }]
+  },
+  {
+    id: "quiz-data-5-q5",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "An automated monthly retraining pipeline should deploy the new model only when what holds?",
+    options: [
+      { key: "A", text: "Training finished without SQL errors." },
+      { key: "B", text: "It passes an evaluation gate: metrics on held-out recent data meet or beat the champion; otherwise alert a human and keep the champion." },
+      { key: "C", text: "It is newer than the champion." },
+      { key: "D", text: "The training data was larger." }
+    ],
+    correctAnswer: "B",
+    explanation: "Ungated retraining automates shipping worse models. The champion-vs-challenger gate on fresh held-out data makes automation safe.",
+    technicalResources: [{ name: "MLOps Whitepaper", url: "https://cloud.google.com/resources/mlops-whitepaper", type: "article" }]
+  },
+  {
+    id: "quiz-data-5-q6",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why log every online prediction (features + score + model version) back to BigQuery?",
+    options: [
+      { key: "A", text: "Regulations require it universally." },
+      { key: "B", text: "That table powers drift detection, live accuracy once outcomes mature, incident forensics, and the next training set." },
+      { key: "C", text: "It makes predictions faster." },
+      { key: "D", text: "Vertex refuses to serve without it." }
+    ],
+    correctAnswer: "B",
+    explanation: "The prediction log is MLOps' central artifact — monitoring, evaluation, and retraining all read from it. Skipping it leaves you blind post-deploy.",
+    technicalResources: [{ name: "Vertex Predictions", url: "https://cloud.google.com/vertex-ai/docs/predictions/get-predictions", type: "docs" }]
+  },
+  {
+    id: "quiz-data-5-q7",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "How do you serve a BQML model with sub-100ms online latency?",
+    options: [
+      { key: "A", text: "Query BigQuery per request." },
+      { key: "B", text: "Export the model and deploy it to a Vertex AI endpoint (which also supports canary traffic splits)." },
+      { key: "C", text: "Email predictions." },
+      { key: "D", text: "It's impossible." }
+    ],
+    correctAnswer: "B",
+    explanation: "For online serving, export BQML to GCS and deploy on a Vertex endpoint; BigQuery batch serving suits nightly workloads, not per-request latency.",
+    technicalResources: [{ name: "Export BQML Models", url: "https://cloud.google.com/bigquery/docs/exporting-models", type: "docs" }]
+  },
+  {
+    id: "quiz-data-5-q8",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "hard",
+    question: "What is training/serving skew?",
+    options: [
+      { key: "A", text: "A network timeout." },
+      { key: "B", text: "Features computed differently offline (training) vs online (serving), silently corrupting predictions; one shared feature definition is the cure." },
+      { key: "C", text: "A model that overfits." },
+      { key: "D", text: "A billing anomaly." }
+    ],
+    correctAnswer: "B",
+    explanation: "When offline and online feature computation diverge, predictions degrade invisibly. A single shared feature definition prevents skew.",
+    technicalResources: [{ name: "Vertex Predictions", url: "https://cloud.google.com/vertex-ai/docs/predictions/get-predictions", type: "docs" }]
+  },
+  {
+    id: "quiz-data-5-q9",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What does a PSI (Population Stability Index) above ~0.2 conventionally signal?",
+    options: [
+      { key: "A", text: "The model improved." },
+      { key: "B", text: "Actionable distribution drift between the serving population and the training baseline." },
+      { key: "C", text: "A storage limit." },
+      { key: "D", text: "Perfect stability." }
+    ],
+    correctAnswer: "B",
+    explanation: "PSI is a bucketed distribution-comparison metric; >0.2 conventionally flags drift worth investigating.",
+    technicalResources: [{ name: "Model Monitoring", url: "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview", type: "docs" }]
+  },
+  {
+    id: "quiz-data-5-q10",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-5",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why is a model described as an asset that 'depreciates'?",
+    options: [
+      { key: "A", text: "It costs money to store." },
+      { key: "B", text: "The world drifts away from its training data over time, so its validity decays and it must be monitored and retrained." },
+      { key: "C", text: "Its file size grows." },
+      { key: "D", text: "It becomes read-only." }
+    ],
+    correctAnswer: "B",
+    explanation: "Reality drifts from training data, so models degrade silently. MLOps is the engineering that notices (drift/live accuracy) and responds (gated retraining).",
+    technicalResources: [{ name: "MLOps Whitepaper", url: "https://cloud.google.com/resources/mlops-whitepaper", type: "article" }]
+  },
+
   // ── Module 6 ──
   {
     id: "quiz-data-6-q1",
@@ -322,5 +924,124 @@ export const DATA_QUIZZES: QuizQuestion[] = [
     correctAnswer: ["A", "B", "D"],
     explanation: "Freshness honesty, defined metrics, and purposeful charts are what end 'your numbers don't match mine' meetings. Chart density does the opposite.",
     technicalResources: [{ name: "Looker Studio Help", url: "https://support.google.com/looker-studio", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q4",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "Why should BI dashboards read a curated reporting layer of views rather than raw tables?",
+    options: [
+      { key: "A", text: "Raw tables are invisible to BI tools." },
+      { key: "B", text: "The view layer absorbs schema changes, defines business logic once, enables narrow IAM, and points dashboards at cheap pre-aggregated data." },
+      { key: "C", text: "Views are always faster than tables." },
+      { key: "D", text: "It's required for email delivery." }
+    ],
+    correctAnswer: "B",
+    explanation: "The reporting layer is a contract: stability for reports, one definition of truth, least-privilege access, and cost control via pre-aggregation.",
+    technicalResources: [{ name: "Visualize with Looker Studio", url: "https://cloud.google.com/bigquery/docs/visualize-looker-studio", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q5",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "architecture_scenario",
+    difficulty: "hard",
+    question: "A KPI dashboard for 200 daily viewers fires live BigQuery queries on every filter click. The KPI data is ~20 MB, refreshed nightly. Best fix?",
+    options: [
+      { key: "A", text: "Ask viewers to filter less." },
+      { key: "B", text: "Switch to an extract data source (snapshot with scheduled refresh) — 20 MB fits, so interactions cost zero query dollars." },
+      { key: "C", text: "Give everyone their own dashboard copy." },
+      { key: "D", text: "Move data to Firestore." }
+    ],
+    correctAnswer: "B",
+    explanation: "Extract data sources snapshot up to 100 MB into Looker Studio's store; nightly-refresh KPI sets are the textbook case. BI Engine is the live alternative.",
+    technicalResources: [{ name: "Extract Data Sources", url: "https://support.google.com/looker-studio/answer/9019969", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q6",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is BI Engine used for?",
+    options: [
+      { key: "A", text: "Storing secrets." },
+      { key: "B", text: "In-memory acceleration reserving capacity for sub-second dashboard queries on hot data." },
+      { key: "C", text: "Training ML models." },
+      { key: "D", text: "Managing IAM." }
+    ],
+    correctAnswer: "B",
+    explanation: "BI Engine caches hot data in memory so dashboard queries return in sub-second time, when data must stay live rather than extracted.",
+    technicalResources: [{ name: "BI Engine", url: "https://cloud.google.com/bigquery/docs/bi-engine-intro", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q7",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "What is the value of a freshness stamp bound to MAX(stat_date) on a dashboard?",
+    options: [
+      { key: "A", text: "It looks decorative." },
+      { key: "B", text: "It is the trust signal answering 'is this current?' — and reveals a failed pipeline instead of silently serving stale data as current." },
+      { key: "C", text: "It speeds up queries." },
+      { key: "D", text: "It enforces IAM." }
+    ],
+    correctAnswer: "B",
+    explanation: "A freshness stamp is a ten-minute addition that permanently answers 'is this current?' and exposes stale data honestly.",
+    technicalResources: [{ name: "Looker Studio Help", url: "https://support.google.com/looker-studio", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q8",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "How do you provide per-instructor row-level security in the reporting layer?",
+    options: [
+      { key: "A", text: "Give everyone the same view." },
+      { key: "B", text: "Use an authorized view with a SESSION_USER() filter, so readers see only their rows without direct table access." },
+      { key: "C", text: "Email filtered CSVs." },
+      { key: "D", text: "Disable the dashboard." }
+    ],
+    correctAnswer: "B",
+    explanation: "Authorized views grant access to underlying data readers can't query directly; SESSION_USER() filters implement row-level security.",
+    technicalResources: [{ name: "Authorized Views", url: "https://cloud.google.com/bigquery/docs/authorized-views", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q9",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "multiple_choice",
+    difficulty: "easy",
+    question: "Why rename fields to business language in the BI data source rather than at chart level?",
+    options: [
+      { key: "A", text: "Chart-level renames are faster." },
+      { key: "B", text: "The data-source layer is a mini semantic model; naming there propagates to every chart, while chart-level renames drift apart." },
+      { key: "C", text: "It changes the underlying SQL." },
+      { key: "D", text: "It has no effect." }
+    ],
+    correctAnswer: "B",
+    explanation: "Renaming in the shared data source gives every chart consistent business language; chart-level renames don't propagate and diverge.",
+    technicalResources: [{ name: "Looker Studio Help", url: "https://support.google.com/looker-studio", type: "docs" }]
+  },
+  {
+    id: "quiz-data-6-q10",
+    courseId: "course-bigquery-mlops",
+    moduleId: "mod-data-6",
+    type: "multiple_choice",
+    difficulty: "medium",
+    question: "What is the atomic unit of an executive dashboard?",
+    options: [
+      { key: "A", text: "A pie chart." },
+      { key: "B", text: "A KPI scorecard — a single number with a period-over-period comparison delta." },
+      { key: "C", text: "A raw data table." },
+      { key: "D", text: "A SQL query box." }
+    ],
+    correctAnswer: "B",
+    explanation: "Scorecards (a headline number plus its delta) are the executive dashboard's building block, backed by pre-aggregated reporting views.",
+    technicalResources: [{ name: "Looker Studio", url: "https://cloud.google.com/looker/docs/studio", type: "docs" }]
   }
 ];
