@@ -91,7 +91,9 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    // SPA fallback. Express 5 (path-to-regexp v8) rejects the bare '*' wildcard,
+    // so use the named optional splat which also matches the root path.
+    app.get('/{*splat}', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
