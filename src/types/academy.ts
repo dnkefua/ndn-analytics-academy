@@ -199,3 +199,85 @@ export interface LearnerProgress {
   projectSubmissions: ProjectSubmission[];
   certificates: EarnedCertificate[];
 }
+
+export interface SystemStatusItem {
+  id: string;
+  time: string;
+  category: string;
+  message: string;
+  status: 'info' | 'success' | 'warning';
+}
+
+export interface RecommendedTrack {
+  id: string;
+  title: string;
+  description: string;
+  modulesCount: number;
+  level: string;
+  icon: string;
+  category: string;
+}
+
+export interface ActiveBuild {
+  id: string;
+  title: string;
+  description: string;
+  repoUrl: string;
+  status: 'STABLE_RELEASE' | 'EVAL_RUNNING';
+  progressLabel: string;
+  progressValue: number;
+  complete: boolean;
+}
+
+export interface SkillNode {
+  id: string;
+  label: string;
+  level: string;
+  icon: string;
+  x: number;
+  y: number;
+}
+
+export interface EvalQueueItem {
+  id: string;
+  fileName: string;
+  status: 'QUEUED' | 'RUNNING' | 'COMPLETED';
+}
+
+export interface GradeItem {
+  id: string;
+  courseCode: string;
+  courseTitle: string;
+  category: string;
+  credits: number;
+  quizScore: number;
+  labScore: number;
+  finalGrade: 'A+' | 'A' | 'A-' | 'B+' | 'B';
+  status: 'COMPLETED' | 'IN_PROGRESS';
+  term: string;
+}
+
+export interface TranscriptRecord {
+  studentName: string;
+  studentId: string;
+  enrollmentDate: string;
+  gpa: number;
+  totalCredits: number;
+  cpdPoints: number;
+  verificationHash: string;
+  grades: GradeItem[];
+}
+
+export interface Certificate {
+  id: string;
+  courseId: string;
+  title: string;
+  trackName: string;
+  recipientName: string;
+  issueDate: string;
+  verificationId: string;
+  badgeIcon: string;
+  cpdCredits: number;
+  instructorName: string;
+  isUnlocked: boolean;
+}

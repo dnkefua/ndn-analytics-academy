@@ -1,207 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { Course, LearnerProgress, LabSubmission, ProjectSubmission, QuizAttempt } from './types/academy';
-import { COURSES } from './data/courses';
-import {
-  getProgress,
-  setActiveCourse as saveActiveCourse,
-  markLessonComplete as saveLessonComplete,
-  saveLabSubmission as saveLabSubmissionStore,
-  saveProjectSubmission as saveProjectSubmissionStore,
-  recordQuizAttempt as saveQuizAttemptStore,
-} from './services/localProgressStore';
-import { calculateCourseGrade } from './services/gradingService';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-import { Header } from './components/Header';
-import { AcademyCatalog } from './components/AcademyCatalog';
-import { CourseDetail } from './components/CourseDetail';
-import { LessonView } from './components/LessonView';
-import { AssessmentEngine } from './components/AssessmentEngine';
-import { AssessmentsHub } from './components/AssessmentsHub';
-import { ProjectWorkbench } from './components/ProjectWorkbench';
-import { TranscriptView } from './components/TranscriptView';
-import { CertificationsView } from './components/CertificationsView';
-import { AiMentorChat } from './components/AiMentorChat';
-import { Bot, MessageSquare } from 'lucide-react';
+// Layout & Assistive Components
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import AriaFAB from './components/aria/AriaFAB';
 
-type AppTab = 'catalog' | 'detail' | 'learn' | 'quiz' | 'projects' | 'transcript' | 'certificates';
+// Marketing Pages & Sections
+import HeroGlass from './components/hero/HeroGlass';
+import ProductsSection from './components/products/ProductsSection';
+import ProductDetail from './components/products/ProductDetail';
+import SolutionsSection from './components/solutions/SolutionsSection';
+import TechSection from './components/tech/TechSection';
+import AboutSection from './components/about/AboutSection';
+import ContactSection from './components/contact/ContactSection';
+import BlogSection from './components/blog/BlogSection';
+import BlogPost from './components/blog/BlogPost';
+import AIToolsSection from './components/aitools/AIToolsSection';
+import AIProductsLanding from './components/landing/AIProductsLanding';
+import BlockchainSolutionsLanding from './components/landing/BlockchainSolutionsLanding';
+import GoogleCloudAILanding from './components/landing/GoogleCloudAILanding';
+import SmartContractLanding from './components/landing/SmartContractLanding';
+import AIAutomationLanding from './components/landing/AIAutomationLanding';
+import LocalServiceLanding from './components/landing/LocalServiceLanding';
+import { LOCAL_SERVICE_SLUGS } from './lib/localServiceRoutes';
+import CaseStudiesSection from './components/casestudies/CaseStudiesSection';
+import CaseStudyDetail from './components/casestudies/CaseStudyDetail';
+import WhitePaper from './components/whitepaper/WhitePaper';
+import CheckoutSuccess from './components/checkout/CheckoutSuccess';
+import CheckoutCancelled from './components/checkout/CheckoutCancelled';
+import PrivacyPolicy from './components/legal/PrivacyPolicy';
+import TermsOfService from './components/legal/TermsOfService';
+import EditorialPolicy from './components/publisher/EditorialPolicy';
+import CorrectionsPolicy from './components/publisher/CorrectionsPolicy';
+import AuthorProfile from './components/publisher/AuthorProfile';
+import ProcessPage from './components/process/ProcessPage';
+import FineTuningTeaser from './components/products/FineTuningTeaser';
+import AdminDashboard from './components/admin/AdminDashboard';
+import NotFound from './components/errors/NotFound';
+
+// Academy Platform & Custom Social Media Landing Page
+import AcademyApp from './components/AcademyApp';
+import TikTokLanding from './components/landing/TikTokLanding';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<AppTab>('catalog');
-  const [learnerProgress, setLearnerProgress] = useState<LearnerProgress>(getProgress());
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [activeQuizId, setActiveQuizId] = useState<string | undefined>(undefined);
-  const [quizOrigin, setQuizOrigin] = useState<'learn' | 'quiz'>('quiz');
-  const [aiChatOpen, setAiChatOpen] = useState<boolean>(false);
-
-  // Header navigation: opening the Assessments tab always lands on the hub
-  const handleTabChange = (tab: AppTab) => {
-    if (tab === 'quiz') setActiveQuizId(undefined);
-    setActiveTab(tab);
-  };
-
-  // Sync progress state
-  useEffect(() => {
-    setLearnerProgress(getProgress());
-  }, []);
-
-  const handleSelectCourse = (course: Course) => {
-    setSelectedCourse(course);
-    setActiveTab('detail');
-  };
-
-  const handleStartCourse = (courseId: string) => {
-    const targetCourse = COURSES.find(c => c.id === courseId) || COURSES[0];
-    setSelectedCourse(targetCourse);
-    const updated = saveActiveCourse(courseId);
-    setLearnerProgress(updated);
-    setActiveTab('learn');
-  };
-
-  const handleMarkLessonComplete = (lessonId: string) => {
-    const updated = saveLessonComplete(lessonId);
-    setLearnerProgress(updated);
-  };
-
-  const handleSaveLabSubmission = (submission: LabSubmission) => {
-    const updated = saveLabSubmissionStore(submission);
-    setLearnerProgress(updated);
-  };
-
-  const handleRecordQuizAttempt = (attempt: QuizAttempt) => {
-    const updated = saveQuizAttemptStore(attempt);
-    setLearnerProgress(updated);
-  };
-
-  const handleSaveProjectSubmission = (submission: ProjectSubmission) => {
-    const updated = saveProjectSubmissionStore(submission);
-    setLearnerProgress(updated);
-  };
-
-  // Launched from within a lesson's syllabus sidebar
-  const handleOpenQuiz = (quizId: string) => {
-    setActiveQuizId(quizId);
-    setQuizOrigin('learn');
-    setActiveTab('quiz');
-  };
-
-  // Launched from the Assessments hub
-  const handleOpenQuizFromHub = (quizGroupId: string) => {
-    setActiveQuizId(quizGroupId);
-    setQuizOrigin('quiz');
-    setActiveTab('quiz');
-  };
-
-  // Exit an active quiz back to wherever it was launched from
-  const handleCloseQuiz = () => {
-    setActiveQuizId(undefined);
-    setActiveTab(quizOrigin);
-  };
-
-  // Build progress % map for catalog cards
-  const progressPercentMap: Record<string, number> = {};
-  COURSES.forEach(c => {
-    const summary = calculateCourseGrade(c.id, learnerProgress);
-    progressPercentMap[c.id] = summary.completionPercent;
-  });
-
   return (
-    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950">
-      {/* Background Circuit Grid Accent */}
-      <div className="fixed inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none z-0" />
+    <>
+      <Navbar />
+      <main id="main-content" style={{ position: 'relative', zIndex: 10 }}>
+        <Routes>
+          {/* Main Website Marketing Pages */}
+          <Route path="/" element={<HeroGlass />} />
+          <Route path="/products" element={<ProductsSection />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/solutions" element={<SolutionsSection />} />
+          <Route path="/tech" element={<TechSection />} />
+          <Route path="/about" element={<AboutSection />} />
+          <Route path="/contact" element={<ContactSection />} />
+          <Route path="/blog" element={<BlogSection />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/pricing" element={<Navigate to="/contact" replace />} />
+          <Route path="/ai-tools" element={<AIToolsSection />} />
+          <Route path="/ai-products" element={<AIProductsLanding />} />
+          <Route path="/blockchain-solutions" element={<BlockchainSolutionsLanding />} />
+          <Route path="/google-cloud-ai-consulting" element={<GoogleCloudAILanding />} />
+          <Route path="/smart-contract-development" element={<SmartContractLanding />} />
+          <Route path="/ai-automation" element={<AIAutomationLanding />} />
+          
+          {/* Geo-Targeted Service Landing Pages */}
+          {LOCAL_SERVICE_SLUGS.map((slug) => (
+            <Route key={slug} path={`/${slug}`} element={<LocalServiceLanding />} />
+          ))}
+          
+          {/* Portfolios, Case Studies, & Workflows */}
+          <Route path="/case-studies" element={<CaseStudiesSection />} />
+          <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
+          <Route path="/checkout/success" element={<CheckoutSuccess />} />
+          <Route path="/checkout/cancelled" element={<CheckoutCancelled />} />
+          
+          {/* Editorial & Legal Disclaimers */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/editorial-policy" element={<EditorialPolicy />} />
+          <Route path="/corrections-policy" element={<CorrectionsPolicy />} />
+          <Route path="/authors/:slug" element={<AuthorProfile />} />
+          
+          {/* Deep Dives & Processes */}
+          <Route path="/process" element={<ProcessPage />} />
+          <Route path="/whitepaper" element={<WhitePaper />} />
+          <Route path="/fine-tuning" element={<FineTuningTeaser />} />
+          <Route path="/admin" element={<AdminDashboard />} />
 
-      {/* Header Navigation */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={(tab) => handleTabChange(tab as AppTab)}
-        studentName={learnerProgress.studentName}
-      />
+          {/* Dedicated Landing Funnel for Social Traffic */}
+          <Route path="/tiktok" element={<TikTokLanding />} />
 
-      {/* Main Container */}
-      <main className="flex-1 relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'catalog' && (
-          <AcademyCatalog
-            onSelectCourse={handleSelectCourse}
-            onStartCourse={handleStartCourse}
-            activeCourseId={learnerProgress.activeCourseId}
-            learnerProgressPercentMap={progressPercentMap}
-          />
-        )}
+          {/* Interactive Academy Learning platform */}
+          <Route path="/academy/*" element={<AcademyApp />} />
 
-        {activeTab === 'detail' && selectedCourse && (
-          <CourseDetail
-            course={selectedCourse}
-            onStartCourse={handleStartCourse}
-            onBackToCatalog={() => setActiveTab('catalog')}
-            isEnrolled={learnerProgress.activeCourseId === selectedCourse.id}
-          />
-        )}
-
-        {activeTab === 'learn' && (
-          <LessonView
-            courseId={learnerProgress.activeCourseId || COURSES[0].id}
-            learnerProgress={learnerProgress}
-            onMarkLessonComplete={handleMarkLessonComplete}
-            onSaveLabSubmission={handleSaveLabSubmission}
-            onOpenQuiz={handleOpenQuiz}
-            onBackToCatalog={() => setActiveTab('catalog')}
-          />
-        )}
-
-        {activeTab === 'quiz' && (
-          activeQuizId ? (
-            <AssessmentEngine
-              quizId={activeQuizId}
-              onRecordAttempt={handleRecordQuizAttempt}
-              onBackToSyllabus={handleCloseQuiz}
-            />
-          ) : (
-            <AssessmentsHub
-              learnerProgress={learnerProgress}
-              onOpenQuiz={handleOpenQuizFromHub}
-            />
-          )
-        )}
-
-        {activeTab === 'projects' && (
-          <ProjectWorkbench
-            learnerProgress={learnerProgress}
-            onSaveProjectSubmission={handleSaveProjectSubmission}
-          />
-        )}
-
-        {activeTab === 'transcript' && (
-          <TranscriptView
-            learnerProgress={learnerProgress}
-          />
-        )}
-
-        {activeTab === 'certificates' && (
-          <CertificationsView
-            learnerProgress={learnerProgress}
-          />
-        )}
+          {/* Catch-all Fallback */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
-
-      {/* Floating AI Mentor Chat Button / Modal */}
-      <div className="fixed bottom-6 right-6 z-50">
-        {aiChatOpen ? (
-          <div className="w-80 sm:w-96 h-[500px]">
-            <AiMentorChat
-              learnerProgress={learnerProgress}
-              activeCourseId={learnerProgress.activeCourseId}
-              onClose={() => setAiChatOpen(false)}
-            />
-          </div>
-        ) : (
-          <button
-            onClick={() => setAiChatOpen(true)}
-            className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-bold shadow-xl shadow-cyan-500/25 flex items-center space-x-2.5 transition-all hover:scale-105 cursor-pointer"
-          >
-            <Bot className="w-6 h-6 text-slate-950" />
-            <span className="text-xs font-extrabold font-display">AI MENTOR</span>
-          </button>
-        )}
-      </div>
-    </div>
+      <Footer />
+      <AriaFAB />
+    </>
   );
 }

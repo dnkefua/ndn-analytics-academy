@@ -1,0 +1,75 @@
+/* ── TikTok / Academy Landing Page Styling ────────────────────── */
+
+.tiktok-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding-bottom: 80px;
+}
+
+.tiktok-page .container {
+  position: relative;
+  z-index: 10;
+}
+
+.tiktok-page h1,
+.tiktok-page h2,
+.tiktok-page h3 {
+  font-family: 'Outfit', 'Syne Variable', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.tiktok-page .glass-card {
+  background: rgba(10, 22, 40, 0.45);
+  border: 1px solid rgba(6, 182, 212, 0.12);
+  border-radius: 20px;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 16px 40px rgba(1, 10, 24, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.tiktok-page .glass-card:hover {
+  border-color: rgba(6, 182, 212, 0.25);
+  box-shadow: 0 20px 48px rgba(1, 10, 24, 0.55), 0 0 25px rgba(6, 182, 212, 0.05);
+}
+
+/* Specific button styles */
+.tiktok-page .btn-primary {
+  background: linear-gradient(135deg, var(--brand-cyan, #06b6d4) 0%, var(--brand-purple, #7c3aed) 100%);
+  color: #020617;
+  font-weight: 800;
+  border: none;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tiktok-page .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4), 0 0 15px rgba(124, 58, 237, 0.2);
+  filter: brightness(1.1);
+}
+
+/* Custom lead generation inputs */
+.tiktok-page .form-input {
+  background: rgba(2, 6, 23, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #eff6ff !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tiktok-page .form-input:focus {
+  border-color: var(--brand-cyan, #06b6d4) !important;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .tiktok-page {
+    padding-top: 80px;
+  }
+  
+  .tiktok-page .grid {
+    grid-template-columns: 1fr !important;
+  }
+}

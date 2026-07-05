@@ -24,7 +24,7 @@
   "include": [
     "src/App.tsx",
     "src/main.tsx",
-    "src/types.ts",
+    "src/types/**/*",
     "src/data.ts",
     "src/components/Header.tsx",
     "src/components/AcademyDashboard.tsx",

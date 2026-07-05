@@ -400,6 +400,40 @@ export const PRODUCTS: Product[] = [
       ],
     },
   },
+  {
+    id: 'ndn-017',
+    number: 'NDN-017',
+    name: 'NDN Analytics Academy',
+    description: 'Interactive AI training and education platform specializing in hands-on AI application building, offering guided lessons, sandbox workspaces, coding assessments, and module evaluations.',
+    tagline: 'Start learning AI application building today.',
+    features: ['Interactive AI tutorials', 'Module evaluations hub', 'Coding assessments', 'Free AI roadmaps', 'Community access'],
+    badge: 'Education AI',
+    stack: 'new',
+    icon: 'A',
+    industries: ['Online Learning', 'Developer Education', 'Enterprise Upskilling', 'AI Research'],
+    useCases: [
+      'Learn how to build and deploy custom AI/ML products using Vertex AI, Gemini APIs, and Firebase',
+      'Evaluate your developer team with on-platform coding assessments and module evaluations',
+      'Follow structured learning pathways and free AI application building roadmaps',
+      'Access 1-on-1 mentorship and join a global community of AI developers',
+    ],
+    howItWorks: 'NDN Analytics Academy is an interactive education platform built as a Next.js workspace. It guides users from core AI concepts to full production-ready builds. It includes real-time quiz systems, grading tools, coding playpens, and custom module evaluation dashboards.',
+    metrics: ['100% hands-on building projects', 'Comprehensive module assessments', 'Includes free AI builder roadmaps', 'Direct 1-on-1 mentorship access'],
+    website: 'https://github.com/dnkefua/ndn-analytics-academy.git',
+    media: {
+      image: '/assets/ndn-analytics-platform-overview.png',
+      video: '/assets/ndn-analytics-platform-overview.mp4',
+      logo: '/assets/ndn_3d_logo.png',
+      gallery: [
+        {
+          type: 'image',
+          src: '/assets/ndn-analytics-platform-overview.png',
+          label: 'NDN Analytics Academy platform workspace overview',
+          alt: 'NDN Analytics Academy platform workspace overview',
+        },
+      ],
+    },
+  },
 ];
 
 export const GCLOUD_PRODUCTS = PRODUCTS.filter(p => p.stack === 'gcloud');
@@ -420,6 +454,7 @@ const CAPABILITY_MAP: Record<string, Capability> = {
   'ndn-011': 'automation', // NDN Interpreter (vision AI)
   'ndn-012': 'automation', // NDN Model Studio (AI fine-tuning)
   'ndn-016': 'automation', // Student Teacher App
+  'ndn-017': 'automation', // NDN Analytics Academy
 
   // Decision Support & Industry AI — turn data into decisions
   'ndn-001': 'decision-support', // NDN Demand IQ

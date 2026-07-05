@@ -60,3 +60,5 @@ export interface Value {
   description: string;
   icon: string;
 }
+
+export * from './academy';

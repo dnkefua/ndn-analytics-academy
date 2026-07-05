@@ -26,6 +26,72 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'introducing-ndn-analytics-academy',
+    title: 'Introducing NDN Analytics Academy: The Practical Hub for Learning AI Application Building',
+    excerpt: 'Learn how to build, fine-tune, and deploy custom AI and blockchain applications from scratch with interactive lessons, sandbox environments, and guided modules.',
+    content: `The AI landscape is moving at breakneck speed. Today, the challenge isn’t just understanding what neural networks are — it’s knowing how to engineer, orchestrate, fine-tune, and deploy them to production at scale.
+
+While there are thousands of generic tutorials on prompt engineering or basic chatbot API calls, very few resources teach the actual system architecture required to build production-ready AI products.
+
+That is why we built the NDN Analytics Academy (or NDN Academy). 
+
+Our mission is simple: to provide a hands-on, code-first education hub that guides developers and teams from writing their first Gemini API call to deploying auto-scaling, serverless AI applications on Google Cloud and Ethereum.
+
+## What is NDN Analytics Academy?
+
+NDN Analytics Academy is an interactive education platform designed as a Next.js developer workspace. It moves past generic slides and theory, focusing entirely on practical building. 
+
+Every module in the academy centers on a real-world project, using the exact same stack we use to build NDN flagship products:
+- AI Engineering: Google Vertex AI, Gemini API, BigQuery ML, and Vector Databases.
+- Web App Infrastructure: Next.js, Firebase, Cloud Functions, and serverless edge runtimes.
+- Blockchain & Trust: Solidity, Ethereum, IPFS content storage, and Web3 interaction libraries.
+
+## Core Features of the Platform
+
+### 1. Hands-On Coding Sandboxes
+You learn to code by coding. NDN Academy includes sandbox terminals where you write and execute code side-by-side with your lessons. We cover key workflows like structuring JSON outputs from LLMs, setting up vector search indexes, and compiling Solidity smart contracts.
+
+### 2. Module Evaluations Hub
+To ensure you have actually mastered a topic before moving on, the platform includes a comprehensive Module Evaluations Hub. Track your progress across modules, attempt assessments, view your historical scores, and earn verifiable on-chain certificates powered by NDN CredVault.
+
+### 3. Step-by-Step AI App Builder Roadmaps
+We’ve mapped out structured learning paths that remove the guesswork from learning AI engineering. Learn what to study first (API orchestration, retrieval-augmented generation), what to focus on next (fine-tuning, vector search), and how to round out your stack (serverless deployment, monitoring).
+
+### 4. Direct Mentorship & Community
+Building in isolation is tough. NDN Academy connects you directly with experienced founders and developers. You can join our global developer communities on WhatsApp and Telegram, share your progress, get help with bugs, and book 1-on-1 mentorship sessions to review your product architectures.
+
+## Who is it For?
+
+- Aspiring AI Engineers: Developers who want to transition from traditional web development to building intelligent, agent-driven systems.
+- Technical Founders: Entrepreneurs who need to build their MVP quickly, choosing robust, cost-effective architectures like Firebase and Google Cloud.
+- Enterprise Engineering Teams: Organizations upskilling their workforce to deploy custom enterprise AI without relying on expensive, generic SaaS wrapper solutions.
+
+## Start Learning Today
+
+The NDN Analytics Academy codebase is fully open source. You can view the repository and explore the code on GitHub: [ndn-analytics-academy on GitHub](https://github.com/dnkefua/ndn-analytics-academy.git).
+
+If you are ready to start your AI building journey:
+1. Explore the Academy: Go to [ndnanalytics.com/academy](/academy) to access our coding sandbox and guided modules.
+2. Download the Roadmap: Get our free AI App Builder Roadmap content upgrade on the academy page to map your path.
+3. Join the Community: Connect with fellow builders on WhatsApp and Telegram to share progress and get feedback.
+
+Let's build the future together.
+
+[Start learning AI App Building](/academy) or [book a mentorship session](/contact?utm_source=blog&utm_medium=cta&utm_campaign=academy_launch).`,
+    date: '2026-07-05',
+    author: 'NDN Analytics Team',
+    category: 'Product',
+    readTime: '6 min read',
+    image: '/assets/ndn-analytics-platform-overview.png',
+    video: '/assets/ndn-analytics-platform-overview.mp4',
+    relatedProducts: ['ndn-017', 'ndn-012', 'ndn-016'],
+    contentUpgrade: {
+      title: 'AI App Builder Roadmap',
+      description: 'Get the step-by-step roadmap to go from absolute beginner to building production-ready AI applications.',
+      downloadId: 'ai-app-builder-roadmap',
+    },
+  },
+  {
     slug: 'why-the-diaspora-app-matters',
     title: 'Why TheDiaspora App Matters: A Digital Home for Global Community, Trust, and Opportunity',
     excerpt: 'Diaspora communities are powerful, distributed, and under-served by generic social platforms. TheDiaspora App gives them a focused space to build trust, identity, commerce, mentorship, and cross-border collaboration.',

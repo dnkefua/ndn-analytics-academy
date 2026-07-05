@@ -8,6 +8,7 @@ import './styles/animations.css'
 import './styles/components.css'
 import './styles/mobile.css'
 import './index.css'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 
 const releaseGlobalScrollLock = () => {
@@ -39,7 +40,9 @@ if (container.hasChildNodes()) {
     container,
     <StrictMode>
       <HelmetProvider>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </HelmetProvider>
     </StrictMode>
   )
@@ -47,7 +50,9 @@ if (container.hasChildNodes()) {
   createRoot(container).render(
     <StrictMode>
       <HelmetProvider>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </HelmetProvider>
     </StrictMode>
   )
