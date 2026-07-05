@@ -132,7 +132,7 @@ export const AssessmentEngine: React.FC<AssessmentEngineProps> = ({
               className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-all flex items-center space-x-2 cursor-pointer shadow-md"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Course</span>
+              <span>Done — Back to Assessments</span>
             </button>
           </div>
         </div>
@@ -252,7 +252,7 @@ export const AssessmentEngine: React.FC<AssessmentEngineProps> = ({
         {/* Controls */}
         <div className="flex justify-between items-center pt-4 border-t border-slate-800">
           <button onClick={onBackToSyllabus} className="text-xs text-slate-400 hover:text-cyan-400 cursor-pointer">
-            ← Exit to Course
+            ← Exit
           </button>
 
           {!submitted ? (

@@ -16,6 +16,7 @@ import { AcademyCatalog } from './components/AcademyCatalog';
 import { CourseDetail } from './components/CourseDetail';
 import { LessonView } from './components/LessonView';
 import { AssessmentEngine } from './components/AssessmentEngine';
+import { AssessmentsHub } from './components/AssessmentsHub';
 import { ProjectWorkbench } from './components/ProjectWorkbench';
 import { TranscriptView } from './components/TranscriptView';
 import { CertificationsView } from './components/CertificationsView';
@@ -29,7 +30,14 @@ export default function App() {
   const [learnerProgress, setLearnerProgress] = useState<LearnerProgress>(getProgress());
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [activeQuizId, setActiveQuizId] = useState<string | undefined>(undefined);
+  const [quizOrigin, setQuizOrigin] = useState<'learn' | 'quiz'>('quiz');
   const [aiChatOpen, setAiChatOpen] = useState<boolean>(false);
+
+  // Header navigation: opening the Assessments tab always lands on the hub
+  const handleTabChange = (tab: AppTab) => {
+    if (tab === 'quiz') setActiveQuizId(undefined);
+    setActiveTab(tab);
+  };
 
   // Sync progress state
   useEffect(() => {
@@ -69,9 +77,24 @@ export default function App() {
     setLearnerProgress(updated);
   };
 
+  // Launched from within a lesson's syllabus sidebar
   const handleOpenQuiz = (quizId: string) => {
     setActiveQuizId(quizId);
+    setQuizOrigin('learn');
     setActiveTab('quiz');
+  };
+
+  // Launched from the Assessments hub
+  const handleOpenQuizFromHub = (quizGroupId: string) => {
+    setActiveQuizId(quizGroupId);
+    setQuizOrigin('quiz');
+    setActiveTab('quiz');
+  };
+
+  // Exit an active quiz back to wherever it was launched from
+  const handleCloseQuiz = () => {
+    setActiveQuizId(undefined);
+    setActiveTab(quizOrigin);
   };
 
   // Build progress % map for catalog cards
@@ -89,7 +112,7 @@ export default function App() {
       {/* Header Navigation */}
       <Header
         activeTab={activeTab}
-        setActiveTab={(tab) => setActiveTab(tab as AppTab)}
+        setActiveTab={(tab) => handleTabChange(tab as AppTab)}
         studentName={learnerProgress.studentName}
       />
 
@@ -125,11 +148,18 @@ export default function App() {
         )}
 
         {activeTab === 'quiz' && (
-          <AssessmentEngine
-            quizId={activeQuizId}
-            onRecordAttempt={handleRecordQuizAttempt}
-            onBackToSyllabus={() => setActiveTab('learn')}
-          />
+          activeQuizId ? (
+            <AssessmentEngine
+              quizId={activeQuizId}
+              onRecordAttempt={handleRecordQuizAttempt}
+              onBackToSyllabus={handleCloseQuiz}
+            />
+          ) : (
+            <AssessmentsHub
+              learnerProgress={learnerProgress}
+              onOpenQuiz={handleOpenQuizFromHub}
+            />
+          )
         )}
 
         {activeTab === 'projects' && (
