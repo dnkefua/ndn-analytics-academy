@@ -21,6 +21,8 @@ export const DATA_LESSONS: Lesson[] = [
 
 BigQuery is a serverless data warehouse that scans terabytes in seconds. Using it well requires understanding *why* it's fast and *what you pay for* — the two are the same mechanism.
 
+@video[Official Google Cloud — What is BigQuery?](https://www.youtube.com/embed/d3MDxC_iuaw)
+
 ## 1. Columnar Storage
 
 Row databases (Postgres, MySQL) store records together — great for "fetch order #123". BigQuery stores **columns** together (Capacitor format) — great for "average revenue across 2 billion rows", because it reads *only the columns you touch*.
@@ -175,6 +177,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Window Functions, Arrays/Structs, Partitioning & Clustering
 
 Four techniques account for most of the gap between "writes SQL" and "engineers analytics on BigQuery".
+
+@video[Official Google Cloud — Partitioning and clustering with BigQuery](https://www.youtube.com/embed/wapi0aR4BZE)
 
 ## 1. Window Functions
 
@@ -511,6 +515,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 
 BigQuery ML trains models *where the data already lives*. No export, no Python cluster, no MLOps scaffolding for the first mile — just SQL. It won't replace Vertex AI for deep learning, but for tabular prediction it gets you to production value astonishingly fast.
 
+@video[Official Google Cloud — BigQuery ML in a minute](https://www.youtube.com/embed/0RMT8uEplbM)
+
 ## 1. Train: CREATE MODEL
 
 Predict whether a student will pass a course, from their first-week behavior:
@@ -679,6 +685,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # MLOps — Vertex AI Serving, Drift Detection & Automated Retraining
 
 A trained model is an asset that **depreciates**: the world drifts away from its training data. MLOps is the engineering that notices and responds.
+
+@video[Official Google Cloud — End-to-end MLOps with Vertex AI](https://www.youtube.com/embed/1ykDWsnL2LE)
 
 ## 1. Batch vs Online Serving
 

@@ -21,6 +21,8 @@ export const AI_LESSONS: Lesson[] = [
 
 Production prompt engineering is not clever phrasing — it is **specification writing** for a probabilistic system, then pinning down the variance. This lesson covers the four levers that matter.
 
+@video[Official Google for Developers — 5 practical Gemini API uses for developers](https://www.youtube.com/embed/gstgT0WRoiE)
+
 ## 1. System Instructions: The Contract
 
 System instructions bind the model's role, constraints, and output policy across every turn:
@@ -179,6 +181,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Production API Integration — Streaming, Retries, Rate Limits & Cost
 
 Calling an LLM in a notebook is one line. Calling it inside a service with users, SLAs, and a budget is systems engineering. This lesson covers the four production concerns.
+
+@video[Official Google Cloud — How to use the Gemini APIs: advanced techniques](https://www.youtube.com/embed/Y10WeRIDKiw)
 
 ## 1. Streaming: Perceived Latency Is the Real Latency
 
@@ -346,6 +350,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Schema-Enforced JSON — responseSchema, Pydantic & Zod
 
 The moment model output feeds code instead of humans, free text becomes a bug factory. Gemini's **native structured output** constrains the decoder itself so responses are guaranteed syntactically valid JSON matching your schema.
+
+@video[Official Firebase — Generating structured output (JSON) using the Gemini API](https://www.youtube.com/embed/pLOrQuReDeQ)
 
 ## 1. Python: Pydantic as the Schema Source
 
@@ -524,6 +530,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 
 Models know nothing about your private data and hallucinate confidently where knowledge ends. **Retrieval-Augmented Generation** fixes both: retrieve relevant facts at question time, and instruct the model to answer *only* from them.
 
+@video[Official Google for Developers — Grounding with Google Search in Google AI Studio and the Gemini API](https://www.youtube.com/embed/1Ba0HQW2WP0)
+
 ## 1. The Two Pipelines
 
 \`\`\`text
@@ -690,6 +698,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Function Calling & Agent Orchestration Loops
 
 Function calling turns a text generator into a system that can **act**: the model emits a structured request to call one of your functions; your code executes it and feeds the result back. Everything agentic is built on this loop.
+
+@video[Official Google for Developers — Build agents with the Gemini API](https://www.youtube.com/embed/OdrOmc_RX8A)
 
 ## 1. Declare Tools
 

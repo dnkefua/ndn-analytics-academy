@@ -183,6 +183,8 @@ Complete the lab in the **Lab Studio** panel below and submit your repo and buil
 
 Android proves app authenticity with cryptographic signing. Lose control of signing and you lose the ability to update your app — or worse, someone else gains it. This lesson makes the key ceremony safe and repeatable.
 
+@video[Official Android Developers — App Bundles: testing bundles with bundletool and the Play Console (MAD Skills)](https://www.youtube.com/embed/vAEAZPU7w-I)
+
 ## 1. Generate the Upload Keystore
 
 \`\`\`bash
@@ -342,6 +344,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 
 Most first submissions are rejected not for code, but for **declarations**. Google cross-checks what you declare against what your binary actually does — inconsistency is treated as deception.
 
+@video[Official Android Developers — Google Play PolicyBytes: Data safety form walkthrough](https://www.youtube.com/embed/4rfF3y4xchU)
+
 ## 1. Create the App Entry
 
 Console → All apps → Create app: name, default language, app/game, free/paid. Then the **Set up your app** dashboard lists every mandatory task. Work top to bottom; the release button stays locked until all are green.
@@ -474,6 +478,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Testing Tracks, Pre-Launch Reports & Android Vitals
 
 Play's release tracks form a graduated exposure ladder. Skipping rungs is how 1-star launch reviews happen.
+
+@video[Official Android Developers — Android vitals on Google Play Console](https://www.youtube.com/embed/C9MZNEW20B4)
 
 ## 1. The Track Ladder
 
@@ -614,6 +620,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Play Integrity API — Verdicts, Server Verification & Anti-Tamper
 
 The Play Integrity API answers three questions about a running client: is it **your unmodified binary**, installed **from Play**, on a **genuine Android device**? Used correctly, it neutralizes tampered clones, emulator farms, and API abuse.
+
+@video[Official Android Developers — Introducing the Play Integrity API: protect your apps and games](https://www.youtube.com/embed/TyxL78e5Bag)
 
 ## 1. The Golden Rule: Verdicts Are Verified Server-Side
 
@@ -774,6 +782,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Store Listing ASO, Graphic Assets & the Production Rollout
 
 App Store Optimization (ASO) is SEO for Play: the right users finding you, and the listing converting them to installs. Then production rollout puts everything from this course on the line — gently.
+
+@video[Official Google Play — Store listing and promotion (PolicyBytes)](https://www.youtube.com/embed/YyHYj9tDIqo)
 
 ## 1. Listing Text That Works
 

@@ -172,6 +172,8 @@ Complete the lab in the **Lab Studio** panel below and submit your command trans
 
 Containers are the deployment unit for everything else in this course. A production image must be small (fast cold starts), reproducible, and minimal in attack surface. Multi-stage builds deliver all three.
 
+@video[Official Google Cloud — Create an Artifact Registry Docker repository on Google Cloud](https://www.youtube.com/embed/YmsRECPZ0f0)
+
 ## 1. The Anti-Pattern
 
 \`\`\`dockerfile
@@ -337,6 +339,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 
 You met Cloud Run as a deployment target in NDN-FB-401. This lesson is the operator's view: capacity math, configuration, and safe releases.
 
+@video[Official Google Cloud — Development to production in 3 easy steps with Cloud Run](https://www.youtube.com/embed/xgBPn-aLmFk)
+
 ## 1. Capacity Math
 
 Cloud Run scales on **concurrent requests**:
@@ -499,6 +503,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # IAM Least Privilege, Service Accounts & Secret Manager
 
 IAM answers one question — **who can do what on which resource** — and most cloud breaches are IAM failures, not exotic exploits. This lesson gives you the production patterns.
+
+@video[Official Google Cloud — Manage your Cloud Run secrets securely with Secret Manager](https://www.youtube.com/embed/JIE89dneaGo)
 
 ## 1. The IAM Model
 
@@ -667,6 +673,8 @@ Complete the lab in the **Lab Studio** panel below and submit for grading.
 # Terraform on GCP — HCL, State & Modules
 
 Everything you've built with \`gcloud\` so far is imperative: a sequence of commands whose result depends on what already existed. **Terraform** is declarative: you describe the end state, it computes the diff. That diff — the *plan* — is what makes infrastructure reviewable like code.
+
+@video[Official HashiCorp — Using Terraform with Google Cloud](https://www.youtube.com/embed/Xni8GUcWQ_s)
 
 ## 1. A Real Configuration
 
