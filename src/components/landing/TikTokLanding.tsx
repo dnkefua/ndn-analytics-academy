@@ -204,6 +204,48 @@ export default function TikTokLanding() {
               <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors" />
             </a>
 
+            {/* Facebook page */}
+            <a 
+              href="https://facebook.com/ndnanalytics" 
+              target="_blank" 
+              rel="noreferrer"
+              className="flex items-center justify-between p-4 bg-slate-900/30 border border-slate-800 hover:border-blue-500/40 rounded-xl transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/20 text-blue-300 rounded-lg">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <span className="block text-xs font-bold text-white">Follow on Facebook</span>
+                  <span className="text-[10px] text-slate-400">Updates, insights, & communities</span>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
+            </a>
+
+            {/* LinkedIn profile */}
+            <a 
+              href="https://www.linkedin.com/company/ndn-analytics-inc/" 
+              target="_blank" 
+              rel="noreferrer"
+              className="flex items-center justify-between p-4 bg-slate-900/30 border border-slate-800 hover:border-sky-500/40 rounded-xl transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-sky-500/20 text-sky-300 rounded-lg">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <span className="block text-xs font-bold text-white">LinkedIn Company Profile</span>
+                  <span className="text-[10px] text-slate-400">Enterprise AI & team scaling news</span>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-sky-400 transition-colors" />
+            </a>
+
             {/* Mentorship booking */}
             <Link 
               to="/contact?utm_source=tiktok&utm_medium=mentorship" 

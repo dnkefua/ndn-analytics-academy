@@ -59,7 +59,8 @@ export default function OrganizationSchema() {
     sameAs: [
       'https://www.linkedin.com/company/ndn-analytics-inc/',
       'https://www.youtube.com/@NDNANALYTICS',
-      // Add Twitter once created: 'https://twitter.com/NDNAnalytics',
+      'https://www.tiktok.com/@ndnanalytics',
+      'https://facebook.com/ndnanalytics',
     ],
     knowsAbout: [
       'Artificial Intelligence',
