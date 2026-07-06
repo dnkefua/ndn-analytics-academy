@@ -1,5 +1,6 @@
 import { Award } from "lucide-react";
 import { cohortInfo } from "../../data/cohort";
+import { certificateAttendanceRules, certificateCompletionRequirements } from "../../data/cohortSchedule";
 
 export function CertificatePreview() {
   return (
@@ -57,6 +58,25 @@ export function CertificatePreview() {
           Complete the cohort to earn your certificate
         </p>
       </div>
+
+      <section className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-[#22C55E]/35 bg-[#22C55E]/10 p-6">
+          <h2 className="text-2xl font-black text-white">Required completion evidence</h2>
+          <ul className="mt-5 space-y-3">
+            {certificateCompletionRequirements.map((item) => (
+              <li key={item} className="text-sm leading-6 text-slate-200">- {item}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-lg border border-[#F5B400]/35 bg-[#F5B400]/10 p-6">
+          <h2 className="text-2xl font-black text-white">Attendance and submission rules</h2>
+          <ul className="mt-5 space-y-3">
+            {certificateAttendanceRules.map((item) => (
+              <li key={item} className="text-sm leading-6 text-slate-200">- {item}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
     </div>
   );
 }

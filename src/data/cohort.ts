@@ -101,9 +101,13 @@ export const deliverables = [
 ];
 
 export const courseFormat = [
-  "2 live sessions per week",
-  "1 weekly office hour",
+  "3 live sessions per week",
+  "6 guided hours per week",
+  "Monday strategy/concept class",
+  "Wednesday guided build class",
+  "Saturday online practical build lab",
   "Weekly assignment",
+  "Sunday assignment deadline",
   "Community support",
   "Demo review",
   "Final presentation",
@@ -113,10 +117,10 @@ export const courseFormat = [
 ];
 
 export const weeklyRhythm = [
-  { day: "Monday", activity: "Weekly lesson and assignment" },
-  { day: "Wednesday", activity: "Live teaching session" },
-  { day: "Saturday", activity: "Build lab / office hour" },
-  { day: "Sunday", activity: "Progress check-in" },
+  { day: "Monday", activity: "Strategy / Concept Class - 1.5 hours" },
+  { day: "Wednesday", activity: "Guided Build Class - 2 hours" },
+  { day: "Saturday", activity: "Online Practical Build Lab - 2.5 hours" },
+  { day: "Sunday", activity: "Assignment deadline - async submission" },
 ];
 
 export const credibilityPoints = [

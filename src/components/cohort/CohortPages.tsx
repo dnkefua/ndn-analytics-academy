@@ -18,6 +18,7 @@ import FAQSchema from "../seo/FAQSchema";
 import { ApplicationCTA } from "./ApplicationCTA";
 import { CertificatePreview } from "./CertificatePreview";
 import { CohortBadge } from "./CohortBadge";
+import { CohortClassRhythm } from "./CohortClassRhythm";
 import { CohortHero } from "./CohortHero";
 import { CurriculumTimeline } from "./CurriculumTimeline";
 import { FAQAccordion } from "./FAQAccordion";
@@ -52,6 +53,12 @@ import { cohortAds } from "../../data/cohortAds";
 import { curriculumWeeks, getWeekBySlug } from "../../data/curriculum";
 import { cohortFaqs } from "../../data/faqs";
 import { pricingOptionLabels, pricingPlans, type PricingPlan } from "../../data/pricing";
+import {
+  certificateAttendanceRules,
+  certificateCompletionRequirements,
+  curriculumSummaryRows,
+  workloadCommitments,
+} from "../../data/cohortSchedule";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -275,6 +282,77 @@ function VideoDocumentationSection() {
       <ResourceGrid title="Video and replay library" items={videoLibrary} icon="video" />
       <ResourceGrid title="Documentation and templates" items={documentationLibrary} icon="document" />
     </div>
+  );
+}
+
+function CurriculumSummaryTable() {
+  return (
+    <div className="overflow-hidden rounded-lg border border-white/12 bg-white/6">
+      <div className="grid grid-cols-[0.8fr_1.2fr_1.4fr] gap-0 border-b border-white/12 bg-[#071527]/90 text-xs font-black uppercase tracking-[0.16em] text-[#F5B400]">
+        <div className="p-4">Week</div>
+        <div className="p-4">Focus</div>
+        <div className="p-4">Main Deliverable</div>
+      </div>
+      {curriculumSummaryRows.map((row) => (
+        <div key={row.week} className="grid grid-cols-[0.8fr_1.2fr_1.4fr] border-b border-white/10 last:border-b-0">
+          <div className="p-4 text-sm font-black text-white">{row.week}</div>
+          <div className="p-4 text-sm text-slate-300">{row.focus}</div>
+          <div className="p-4 text-sm font-bold text-[#BAE6FD]">{row.deliverable}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CertificateRulesSection() {
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <section className="rounded-lg border border-[#22C55E]/35 bg-[#22C55E]/10 p-6">
+        <h3 className="text-2xl font-black text-white">Certificate completion requirements</h3>
+        <ul className="mt-5 space-y-3">
+          {certificateCompletionRequirements.map((item) => (
+            <li key={item} className="flex gap-3 text-sm leading-6 text-slate-200">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-[#22C55E]" aria-hidden="true" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="rounded-lg border border-[#F5B400]/35 bg-[#F5B400]/10 p-6">
+        <h3 className="text-2xl font-black text-white">Attendance and submission rules</h3>
+        <ul className="mt-5 space-y-3">
+          {certificateAttendanceRules.map((item) => (
+            <li key={item} className="flex gap-3 text-sm leading-6 text-slate-200">
+              <span className="mt-2 h-2 w-2 flex-none rounded-full bg-[#F5B400]" aria-hidden="true" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+function WorkloadCommitmentSection() {
+  return (
+    <section className="rounded-lg border border-[#F5B400]/35 bg-[#F5B400]/10 p-6">
+      <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F5B400]">
+        Cohort Time Commitment
+      </p>
+      <h2 className="mt-2 text-2xl font-black text-white">This is a serious builder cohort.</h2>
+      <p className="mt-4 text-sm leading-7 text-slate-300">
+        Students attend 3 live sessions per week: Monday concept class, Wednesday guided build class,
+        and Saturday online practical build lab. Each week includes one assignment due on Sunday.
+      </p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {workloadCommitments.map((item) => (
+          <div key={item} className="rounded-lg border border-white/12 bg-[#071527]/70 p-4 text-sm font-black text-slate-100">
+            {item}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -502,8 +580,16 @@ export function CurriculumPage() {
         </div>
       </Section>
 
+      <Section eyebrow="Cohort Rhythm" title="Total teaching structure">
+        <CohortClassRhythm />
+      </Section>
+
       <Section eyebrow="Tools" title="Tools and concepts covered">
         <OutcomeGrid outcomes={toolsCovered} />
+      </Section>
+
+      <Section eyebrow="Curriculum Summary" title="Weekly focus and main deliverable">
+        <CurriculumSummaryTable />
       </Section>
 
       <Section eyebrow="Learning Outcomes" title="What students will be able to do">
@@ -516,6 +602,10 @@ export function CurriculumPage() {
 
       <Section eyebrow="Weekly Plan" title="Full 6-week curriculum">
         <CurriculumTimeline />
+      </Section>
+
+      <Section eyebrow="Certificate Rules" title="What students must complete to earn the certificate">
+        <CertificateRulesSection />
       </Section>
     </CohortFrame>
   );
@@ -725,6 +815,10 @@ export function ApplyPage() {
               </form>
             )}
           </div>
+        </div>
+
+        <div className="mt-8">
+          <WorkloadCommitmentSection />
         </div>
       </section>
     </CohortFrame>

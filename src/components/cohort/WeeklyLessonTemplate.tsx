@@ -1,12 +1,16 @@
 import { ArrowLeft, CheckCircle2, ClipboardList, FileText, PlayCircle, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { WeeklyLesson } from "../../data/curriculum";
+import { getWeeklySchedule } from "../../data/cohortSchedule";
+import { WeeklyScheduleSection } from "./WeeklyScheduleSection";
 
 interface WeeklyLessonTemplateProps {
   lesson: WeeklyLesson;
 }
 
 export function WeeklyLessonTemplate({ lesson }: WeeklyLessonTemplateProps) {
+  const schedule = getWeeklySchedule(lesson.week);
+
   return (
     <article className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-wrap gap-3">
@@ -36,6 +40,8 @@ export function WeeklyLessonTemplate({ lesson }: WeeklyLessonTemplateProps) {
           {lesson.theme}
         </p>
       </header>
+
+      {schedule && <WeeklyScheduleSection schedule={schedule} />}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="rounded-lg border border-white/12 bg-white/6 p-6">
