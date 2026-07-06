@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
+import { BrowserRouter } from 'react-router-dom'
 import './env'
 import './styles/variables.css'
 import './styles/typography.css'
@@ -39,7 +40,9 @@ if (container.hasChildNodes()) {
     container,
     <StrictMode>
       <HelmetProvider>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </HelmetProvider>
     </StrictMode>
   )
@@ -47,7 +50,9 @@ if (container.hasChildNodes()) {
   createRoot(container).render(
     <StrictMode>
       <HelmetProvider>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </HelmetProvider>
     </StrictMode>
   )

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { Course, LearnerProgress, LabSubmission, ProjectSubmission, QuizAttempt } from './types/academy';
 import { COURSES } from './data/courses';
 import {
@@ -22,10 +23,20 @@ import { TranscriptView } from './components/TranscriptView';
 import { CertificationsView } from './components/CertificationsView';
 import { AiMentorChat } from './components/AiMentorChat';
 import { Bot, MessageSquare } from 'lucide-react';
+import {
+  ApplyPage,
+  CertificatePreviewPage,
+  CohortCourseOverviewPage,
+  CohortLandingPage,
+  CurriculumPage,
+  MarketingAdsPage,
+  StudentDashboardPage,
+  WeekLessonPage,
+} from './components/cohort/CohortPages';
 
 type AppTab = 'catalog' | 'detail' | 'learn' | 'quiz' | 'projects' | 'transcript' | 'certificates';
 
-export default function App() {
+function AcademyExperience() {
   const [activeTab, setActiveTab] = useState<AppTab>('catalog');
   const [learnerProgress, setLearnerProgress] = useState<LearnerProgress>(getProgress());
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -203,5 +214,23 @@ export default function App() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<AcademyExperience />} />
+      <Route path="/courses" element={<AcademyExperience />} />
+      <Route path="/cohort-1" element={<CohortLandingPage />} />
+      <Route path="/courses/ai-mvp-builder-africa" element={<CohortCourseOverviewPage />} />
+      <Route path="/courses/ai-mvp-builder-africa/curriculum" element={<CurriculumPage />} />
+      <Route path="/courses/ai-mvp-builder-africa/:weekSlug" element={<WeekLessonPage />} />
+      <Route path="/apply" element={<ApplyPage />} />
+      <Route path="/student-dashboard" element={<StudentDashboardPage />} />
+      <Route path="/certificate-preview" element={<CertificatePreviewPage />} />
+      <Route path="/marketing/cohort-ads" element={<MarketingAdsPage />} />
+      <Route path="*" element={<Navigate to="/cohort-1" replace />} />
+    </Routes>
   );
 }
