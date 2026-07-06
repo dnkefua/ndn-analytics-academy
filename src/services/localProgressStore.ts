@@ -3,16 +3,33 @@ import { DEFAULT_DEMO_LEARNER } from '../data/demoLearner';
 
 const STORAGE_KEY = "ndn-academy-demo-progress-v2";
 
+const todayISO = (): string => new Date().toISOString().split('T')[0];
+
+/** Ensure fields added after a learner's progress was first saved exist. */
+const withDefaults = (progress: LearnerProgress): LearnerProgress => ({
+  ...progress,
+  activityDates: progress.activityDates ?? [],
+  lastLessonByCourse: progress.lastLessonByCourse ?? {},
+});
+
+/** Record that the learner did something today — powers the streak. */
+const touchActivity = (progress: LearnerProgress): LearnerProgress => {
+  const today = todayISO();
+  const dates = progress.activityDates ?? [];
+  if (dates.includes(today)) return progress;
+  return { ...progress, activityDates: [...dates, today] };
+};
+
 export const getProgress = (): LearnerProgress => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      return withDefaults(JSON.parse(saved));
     }
   } catch (e) {
     console.warn("Failed to load local progress store:", e);
   }
-  return DEFAULT_DEMO_LEARNER;
+  return withDefaults(DEFAULT_DEMO_LEARNER);
 };
 
 export const saveProgress = (progress: LearnerProgress): void => {
@@ -24,17 +41,18 @@ export const saveProgress = (progress: LearnerProgress): void => {
 };
 
 export const resetDemoProgress = (): LearnerProgress => {
-  saveProgress(DEFAULT_DEMO_LEARNER);
-  return DEFAULT_DEMO_LEARNER;
+  const fresh = withDefaults(DEFAULT_DEMO_LEARNER);
+  saveProgress(fresh);
+  return fresh;
 };
 
 export const markLessonComplete = (lessonId: string): LearnerProgress => {
   const current = getProgress();
   if (!current.completedLessonIds.includes(lessonId)) {
-    const updated: LearnerProgress = {
+    const updated: LearnerProgress = touchActivity({
       ...current,
       completedLessonIds: [...current.completedLessonIds, lessonId]
-    };
+    });
     saveProgress(updated);
     return updated;
   }
@@ -43,9 +61,20 @@ export const markLessonComplete = (lessonId: string): LearnerProgress => {
 
 export const setActiveCourse = (courseId: string): LearnerProgress => {
   const current = getProgress();
-  const updated: LearnerProgress = {
+  const updated: LearnerProgress = touchActivity({
     ...current,
     activeCourseId: courseId
+  });
+  saveProgress(updated);
+  return updated;
+};
+
+/** Remember the learner's position in a course so they can resume where they left off. */
+export const setLastLesson = (courseId: string, lessonId: string): LearnerProgress => {
+  const current = getProgress();
+  const updated: LearnerProgress = {
+    ...current,
+    lastLessonByCourse: { ...(current.lastLessonByCourse ?? {}), [courseId]: lessonId }
   };
   saveProgress(updated);
   return updated;
@@ -53,11 +82,15 @@ export const setActiveCourse = (courseId: string): LearnerProgress => {
 
 export const recordQuizAttempt = (attempt: QuizAttempt): LearnerProgress => {
   const current = getProgress();
+  // Keep the learner's BEST attempt per question: a retake can add a new best,
+  // but can never lower a previously earned score.
+  const existing = current.quizAttempts.find(a => a.quizId === attempt.quizId);
+  const keep = existing && existing.score > attempt.score ? existing : attempt;
   const filteredAttempts = current.quizAttempts.filter(a => a.quizId !== attempt.quizId);
-  const updated: LearnerProgress = {
+  const updated: LearnerProgress = touchActivity({
     ...current,
-    quizAttempts: [...filteredAttempts, attempt]
-  };
+    quizAttempts: [...filteredAttempts, keep]
+  });
   saveProgress(updated);
   return updated;
 };
@@ -69,11 +102,11 @@ export const saveLabSubmission = (submission: LabSubmission): LearnerProgress =>
     ? [...current.completedLabIds, submission.labId]
     : current.completedLabIds;
 
-  const updated: LearnerProgress = {
+  const updated: LearnerProgress = touchActivity({
     ...current,
     labSubmissions: [...filteredLabs, submission],
     completedLabIds: completedLabs
-  };
+  });
   saveProgress(updated);
   return updated;
 };
@@ -81,10 +114,10 @@ export const saveLabSubmission = (submission: LabSubmission): LearnerProgress =>
 export const saveProjectSubmission = (submission: ProjectSubmission): LearnerProgress => {
   const current = getProgress();
   const filteredProjects = current.projectSubmissions.filter(s => s.projectId !== submission.projectId);
-  const updated: LearnerProgress = {
+  const updated: LearnerProgress = touchActivity({
     ...current,
     projectSubmissions: [...filteredProjects, submission]
-  };
+  });
   saveProgress(updated);
   return updated;
 };

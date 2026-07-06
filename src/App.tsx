@@ -41,12 +41,16 @@ function AcademyExperience() {
   const [learnerProgress, setLearnerProgress] = useState<LearnerProgress>(getProgress());
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [activeQuizId, setActiveQuizId] = useState<string | undefined>(undefined);
+  const [reviewQuestionIds, setReviewQuestionIds] = useState<string[] | undefined>(undefined);
   const [quizOrigin, setQuizOrigin] = useState<'learn' | 'quiz'>('quiz');
   const [aiChatOpen, setAiChatOpen] = useState<boolean>(false);
 
   // Header navigation: opening the Assessments tab always lands on the hub
   const handleTabChange = (tab: AppTab) => {
-    if (tab === 'quiz') setActiveQuizId(undefined);
+    if (tab === 'quiz') {
+      setActiveQuizId(undefined);
+      setReviewQuestionIds(undefined);
+    }
     setActiveTab(tab);
   };
 
@@ -98,6 +102,15 @@ function AcademyExperience() {
   // Launched from the Assessments hub
   const handleOpenQuizFromHub = (quizGroupId: string) => {
     setActiveQuizId(quizGroupId);
+    setReviewQuestionIds(undefined);
+    setQuizOrigin('quiz');
+    setActiveTab('quiz');
+  };
+
+  // Smart Review: a retrieval-practice session built from previously missed questions
+  const handleOpenReview = (questionIds: string[]) => {
+    setReviewQuestionIds(questionIds);
+    setActiveQuizId('smart-review');
     setQuizOrigin('quiz');
     setActiveTab('quiz');
   };
@@ -105,6 +118,7 @@ function AcademyExperience() {
   // Exit an active quiz back to wherever it was launched from
   const handleCloseQuiz = () => {
     setActiveQuizId(undefined);
+    setReviewQuestionIds(undefined);
     setActiveTab(quizOrigin);
   };
 
@@ -125,6 +139,7 @@ function AcademyExperience() {
         activeTab={activeTab}
         setActiveTab={(tab) => handleTabChange(tab as AppTab)}
         studentName={learnerProgress.studentName}
+        learnerProgress={learnerProgress}
       />
 
       {/* Main Container */}
@@ -162,6 +177,7 @@ function AcademyExperience() {
           activeQuizId ? (
             <AssessmentEngine
               quizId={activeQuizId}
+              questionIds={reviewQuestionIds}
               onRecordAttempt={handleRecordQuizAttempt}
               onBackToSyllabus={handleCloseQuiz}
             />
@@ -169,6 +185,7 @@ function AcademyExperience() {
             <AssessmentsHub
               learnerProgress={learnerProgress}
               onOpenQuiz={handleOpenQuizFromHub}
+              onOpenReview={handleOpenReview}
             />
           )
         )}

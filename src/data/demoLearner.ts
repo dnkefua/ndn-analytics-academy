@@ -47,10 +47,22 @@ const FB_LAB_SUBMISSIONS: LabSubmission[] = FB_LAB_SCORES.map((score, i): LabSub
   gradedAt: `2026-06-${String(11 + i).padStart(2, "0")}T16:05:00Z`
 }));
 
+// A live 5-day learning streak ending today (dates computed at load so the demo never goes stale)
+const DEMO_ACTIVITY_DATES = Array.from({ length: 5 }, (_, i) => {
+  const d = new Date();
+  d.setDate(d.getDate() - (4 - i));
+  return d.toISOString().split("T")[0];
+});
+
 export const DEFAULT_DEMO_LEARNER: LearnerProgress = {
   studentId: STUDENT_ID,
   studentName: "MSc Desmond Nkefua",
   activeCourseId: "course-firebase-gcp",
+  activityDates: DEMO_ACTIVITY_DATES,
+  lastLessonByCourse: {
+    "course-firebase-gcp": "les-fb-7-3",
+    "course-applied-ai-engineering": "les-ai-1-2"
+  },
   completedLessonIds: COMPLETED_LESSONS,
   completedLabIds: FB_LAB_SUBMISSIONS.map(l => l.labId),
   quizAttempts: FB_QUIZ_ATTEMPTS,

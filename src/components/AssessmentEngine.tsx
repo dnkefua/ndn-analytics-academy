@@ -7,9 +7,22 @@ import { HelpCircle, CheckCircle, XCircle, RefreshCw, Award, ArrowRight, ArrowLe
 
 interface AssessmentEngineProps {
   quizId?: string;
+  /** Explicit question set — used by Smart Review to practice previously missed questions. */
+  questionIds?: string[];
   onRecordAttempt: (attempt: QuizAttempt) => void;
   onBackToSyllabus: () => void;
 }
+
+// Fisher–Yates shuffle: varied question order between retakes strengthens
+// retrieval practice (interleaving) and prevents answer-position memorization.
+const shuffle = <T,>(arr: T[]): T[] => {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+};
 
 interface QuestionResult {
   question: QuizQuestion;
@@ -19,13 +32,22 @@ interface QuestionResult {
 
 export const AssessmentEngine: React.FC<AssessmentEngineProps> = ({
   quizId,
+  questionIds,
   onRecordAttempt,
   onBackToSyllabus,
 }) => {
+  const isReview = !!questionIds && questionIds.length > 0;
+
   const questions = useMemo(() => {
+    if (isReview) {
+      const byId = new Map(QUIZZES.map(q => [q.id, q]));
+      const set = questionIds!.map(id => byId.get(id)).filter((q): q is QuizQuestion => !!q);
+      return shuffle(set);
+    }
     const set = quizId ? getQuizQuestions(quizId) : [];
-    return set.length > 0 ? set : QUIZZES.slice(0, 3);
-  }, [quizId]);
+    return shuffle(set.length > 0 ? set : QUIZZES.slice(0, 3));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizId, questionIds]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
@@ -111,7 +133,7 @@ export const AssessmentEngine: React.FC<AssessmentEngineProps> = ({
           <div>
             <h1 className="text-3xl font-extrabold font-display text-white">{pct}%</h1>
             <p className="text-sm text-slate-300 mt-1">
-              {correctCount} of {results.length} correct — {module?.title}
+              {correctCount} of {results.length} correct — {isReview ? 'Smart Review session' : module?.title}
             </p>
           </div>
           <p className={`text-sm font-bold ${passed ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -169,10 +191,10 @@ export const AssessmentEngine: React.FC<AssessmentEngineProps> = ({
             <div className="space-y-1">
               <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
                 <HelpCircle className="w-4 h-4" />
-                <span>{course?.code} — {module?.title}</span>
+                <span>{isReview ? `Smart Review · ${course?.code} — ${module?.title}` : `${course?.code} — ${module?.title}`}</span>
               </span>
               <h1 className="text-xl font-bold text-white font-display">
-                Module Evaluation — Question {currentIndex + 1} of {questions.length}
+                {isReview ? 'Smart Review' : 'Module Evaluation'} — Question {currentIndex + 1} of {questions.length}
               </h1>
             </div>
             <div className="flex flex-col items-end space-y-1">

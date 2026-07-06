@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Course, Module, Lesson, Lab, LearnerProgress } from '../types/academy';
 import { COURSES } from '../data/courses';
 import { MODULES } from '../data/modules';
@@ -6,7 +6,8 @@ import { LESSONS } from '../data/lessons';
 import { LABS } from '../data/labs';
 import { LabStudio } from './LabStudio';
 import { Markdown } from './Markdown';
-import { ArrowLeft, ArrowRight, CheckCircle, Play, BookOpen, Terminal, HelpCircle, FileText, Download, Award, ChevronDown, ChevronRight } from 'lucide-react';
+import { setLastLesson } from '../services/localProgressStore';
+import { ArrowLeft, ArrowRight, CheckCircle, Play, BookOpen, Terminal, HelpCircle, FileText, Download, Award, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 
 interface LessonViewProps {
   courseId: string;
@@ -29,19 +30,40 @@ export const LessonView: React.FC<LessonViewProps> = ({
   const courseModules = MODULES.filter(m => m.courseId === course.id);
   const courseLessons = LESSONS.filter(l => l.courseId === course.id);
 
+  // Resume where the learner left off (Coursera-style), falling back to the first lesson.
+  const savedLessonId = learnerProgress.lastLessonByCourse?.[course.id];
+  const resumeLessonId = savedLessonId && courseLessons.some(l => l.id === savedLessonId)
+    ? savedLessonId
+    : (courseLessons[0]?.id || "");
+
   const [activeModuleId, setActiveModuleId] = useState<string>(courseModules[0]?.id || "");
-  const [activeLessonId, setActiveLessonId] = useState<string>(courseLessons[0]?.id || "");
+  const [activeLessonId, setActiveLessonId] = useState<string>(resumeLessonId);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
   const activeLesson = courseLessons.find(l => l.id === activeLessonId) || courseLessons[0] || LESSONS[0];
   const activeModule = courseModules.find(m => m.id === activeLesson.moduleId) || courseModules[0];
   const currentLab = LABS.find(l => l.moduleId === activeModule?.id);
 
+  // Persist position so the learner returns exactly here next session.
+  useEffect(() => {
+    if (activeLesson?.id) setLastLesson(course.id, activeLesson.id);
+  }, [course.id, activeLesson?.id]);
+
   const isCompleted = learnerProgress.completedLessonIds.includes(activeLesson.id);
 
   const activeIndex = courseLessons.findIndex(l => l.id === activeLesson.id);
   const prevLesson = activeIndex > 0 ? courseLessons[activeIndex - 1] : null;
   const nextLesson = activeIndex < courseLessons.length - 1 ? courseLessons[activeIndex + 1] : null;
+
+  // Course progress + estimated time remaining (visible-progress principle)
+  const completedInCourse = courseLessons.filter(l => learnerProgress.completedLessonIds.includes(l.id)).length;
+  const coursePct = courseLessons.length > 0 ? Math.round((completedInCourse / courseLessons.length) * 100) : 0;
+  const minutesRemaining = courseLessons
+    .filter(l => !learnerProgress.completedLessonIds.includes(l.id))
+    .reduce((sum, l) => sum + l.durationMinutes, 0);
+  const remainingLabel = minutesRemaining >= 60
+    ? `${Math.floor(minutesRemaining / 60)}h ${minutesRemaining % 60}m`
+    : `${minutesRemaining}m`;
 
   return (
     <div className="space-y-6 animate-fade-in text-slate-100 pb-16">
@@ -57,12 +79,30 @@ export const LessonView: React.FC<LessonViewProps> = ({
           <span className="text-white font-bold">{activeModule?.title}</span>
         </div>
 
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-300 hover:text-cyan-400 cursor-pointer"
-        >
-          {sidebarOpen ? "Hide Module Syllabus Sidebar" : "Show Module Syllabus Sidebar"}
-        </button>
+        <div className="flex items-center gap-4">
+          {/* Course progress + time remaining */}
+          <div className="hidden sm:flex items-center gap-2.5" title={`${completedInCourse}/${courseLessons.length} lessons complete · ~${remainingLabel} remaining`}>
+            <div className="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all"
+                style={{ width: `${coursePct}%` }}
+              />
+            </div>
+            <span className="text-xs font-bold text-cyan-300">{coursePct}%</span>
+            {minutesRemaining > 0 && (
+              <span className="flex items-center text-[11px] text-slate-400">
+                <Clock className="w-3 h-3 mr-1" />~{remainingLabel} left
+              </span>
+            )}
+          </div>
+
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-300 hover:text-cyan-400 cursor-pointer"
+          >
+            {sidebarOpen ? "Hide Module Syllabus Sidebar" : "Show Module Syllabus Sidebar"}
+          </button>
+        </div>
       </div>
 
       {/* Main Grid: Syllabus Sidebar + Lesson Player */}
@@ -80,10 +120,26 @@ export const LessonView: React.FC<LessonViewProps> = ({
                 const modLessons = courseLessons.filter(l => l.moduleId === mod.id);
                 const modLab = LABS.find(l => l.moduleId === mod.id);
 
+                const modDone = modLessons.filter(l => learnerProgress.completedLessonIds.includes(l.id)).length;
+                const modPct = modLessons.length > 0 ? Math.round((modDone / modLessons.length) * 100) : 0;
+
                 return (
                   <div key={mod.id} className="space-y-1.5">
-                    <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider px-2 py-1 bg-slate-950/60 rounded-md border border-slate-800">
-                      Module {mod.order}: {mod.title}
+                    <div className="px-2 py-1 bg-slate-950/60 rounded-md border border-slate-800 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider truncate">
+                          Module {mod.order}: {mod.title}
+                        </span>
+                        <span className={`text-[10px] font-bold shrink-0 ${modPct === 100 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                          {modDone}/{modLessons.length}
+                        </span>
+                      </div>
+                      <div className="h-1 rounded-full bg-slate-800 overflow-hidden">
+                        <div
+                          className={`h-full transition-all ${modPct === 100 ? 'bg-emerald-500' : 'bg-cyan-500/70'}`}
+                          style={{ width: `${modPct}%` }}
+                        />
+                      </div>
                     </div>
 
                     <div className="pl-2 space-y-1">

@@ -51,6 +51,40 @@ export const AcademyCatalog: React.FC<AcademyCatalogProps> = ({
         </div>
       </div>
 
+      {/* Continue Learning — resume where you left off */}
+      {activeCourseId && (() => {
+        const activeCourse = COURSES.find(c => c.id === activeCourseId);
+        if (!activeCourse) return null;
+        const pct = learnerProgressPercentMap[activeCourseId] ?? 0;
+        return (
+          <div className="relative rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/50 via-slate-900 to-slate-900 p-5 sm:p-6 shadow-xl overflow-hidden">
+            <div className="absolute top-0 right-0 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest">Continue learning</span>
+                <h3 className="text-lg font-bold text-white font-display truncate mt-0.5">{activeCourse.title}</h3>
+                <div className="flex items-center gap-3 mt-2 max-w-md">
+                  <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-cyan-300 shrink-0">{pct}% complete</span>
+                </div>
+              </div>
+              <button
+                onClick={() => onStartCourse(activeCourse.id)}
+                className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition-all flex items-center space-x-2 cursor-pointer shadow-lg shadow-cyan-500/25 shrink-0"
+              >
+                <Play className="w-4 h-4" />
+                <span>Resume</span>
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Filter and Search Bar */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

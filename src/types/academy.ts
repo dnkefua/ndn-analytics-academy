@@ -198,4 +198,8 @@ export interface LearnerProgress {
   labSubmissions: LabSubmission[];
   projectSubmissions: ProjectSubmission[];
   certificates: EarnedCertificate[];
+  /** ISO dates (YYYY-MM-DD) on which the learner performed any learning action — powers streaks. */
+  activityDates?: string[];
+  /** Last-opened lesson per course — powers resume-where-you-left-off. */
+  lastLessonByCourse?: Record<string, string>;
 }

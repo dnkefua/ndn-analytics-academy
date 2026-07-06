@@ -5,12 +5,13 @@ import { MODULES } from '../data/modules';
 import { getQuizQuestions } from '../data/quizzes';
 import {
   HelpCircle, CheckCircle, RotateCcw, Play, ChevronDown, ChevronRight,
-  Award, Target, TrendingUp, ClipboardList, Lock
+  Award, Target, TrendingUp, ClipboardList, Lock, Brain
 } from 'lucide-react';
 
 interface AssessmentsHubProps {
   learnerProgress: LearnerProgress;
   onOpenQuiz: (quizGroupId: string) => void;
+  onOpenReview?: (questionIds: string[]) => void;
 }
 
 type QuizStatus = 'not_started' | 'in_progress' | 'passed' | 'retake';
@@ -66,7 +67,7 @@ const computeModuleStat = (
   return { moduleId, moduleTitle, order, groupId, total, answered, score, attempts, status };
 };
 
-export const AssessmentsHub: React.FC<AssessmentsHubProps> = ({ learnerProgress, onOpenQuiz }) => {
+export const AssessmentsHub: React.FC<AssessmentsHubProps> = ({ learnerProgress, onOpenQuiz, onOpenReview }) => {
   const [expanded, setExpanded] = useState<string>(
     learnerProgress.activeCourseId || COURSES[0]?.id || ''
   );
@@ -92,6 +93,13 @@ export const AssessmentsHub: React.FC<AssessmentsHubProps> = ({ learnerProgress,
     ? Math.round(attemptedList.reduce((s, q) => s + q.score, 0) / attemptedList.length)
     : 0;
 
+  // Smart Review: questions the learner has attempted but never answered correctly.
+  // Retrieval practice on missed material is the highest-evidence learning technique.
+  const missedQuestionIds = useMemo(
+    () => learnerProgress.quizAttempts.filter(a => a.score < 100).map(a => a.quizId),
+    [learnerProgress]
+  );
+
   return (
     <div className="space-y-8 animate-fade-in text-slate-100 pb-16">
       {/* Header */}
@@ -112,6 +120,34 @@ export const AssessmentsHub: React.FC<AssessmentsHubProps> = ({ learnerProgress,
           </p>
         </div>
       </div>
+
+      {/* Smart Review — retrieval practice on missed questions */}
+      {onOpenReview && missedQuestionIds.length > 0 && (
+        <div className="relative rounded-2xl border border-violet-500/40 bg-gradient-to-r from-violet-950/60 via-slate-900 to-slate-900 p-6 shadow-xl overflow-hidden">
+          <div className="absolute top-0 right-0 w-60 h-60 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center space-x-4 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-violet-500/20 border border-violet-500/40 flex items-center justify-center shrink-0">
+                <Brain className="w-6 h-6 text-violet-300" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-white font-display">Smart Review</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+                  You have <span className="font-bold text-violet-300">{missedQuestionIds.length} missed question{missedQuestionIds.length === 1 ? '' : 's'}</span> across
+                  your courses. Re-testing yourself on missed material (retrieval practice) is the most effective way to make it stick.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => onOpenReview(missedQuestionIds)}
+              className="px-5 py-2.5 rounded-xl bg-violet-500 hover:bg-violet-400 text-white font-bold text-xs transition-all flex items-center space-x-2 cursor-pointer shadow-md shadow-violet-500/20 shrink-0"
+            >
+              <Target className="w-4 h-4" />
+              <span>Practice Missed Questions</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Global stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
