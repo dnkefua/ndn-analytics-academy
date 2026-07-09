@@ -1157,21 +1157,199 @@ This official session covers serving dynamic content alongside static assets in 
     summary: "Connect your repo, configure apphosting.yaml with a secret binding, and ship a health-checked production rollout.",
     durationMinutes: 45,
     readingMarkdown: `
-# Practical Lab
+# Practical Lab - Production Launch on App Hosting
 
-The graduation exercise for this course's infrastructure track: take your app live. Connect GitHub, write apphosting.yaml with correct BUILD/RUNTIME scopes, bind one Secret Manager secret, and complete a green rollout.
+The graduation exercise for this course's infrastructure track: take your app live. You will connect your GitHub repo, configure \`apphosting.yaml\` with correct BUILD/RUNTIME scopes, bind secrets from Secret Manager, push to the live branch, and prove the rollout is green.
+
+@video[Official Firebase - Introducing Firebase App Hosting](https://www.youtube.com/embed/saQ7Ab8ETkY)
+
+@video[Firebase After Hours #6 - Firebase App Hosting](https://www.youtube.com/embed/KWQeElH4pSk)
+
+![Official Firebase App Hosting overview showing GitHub integration, Cloud Build, Cloud Run, Cloud CDN, and Secret Manager as the managed launch path.](/lesson-assets/firebase/app-hosting-overview.jpg "Captured from the official Firebase App Hosting overview documentation.")
+
+![Lab 7 green rollout exercise map: GitHub commit, apphosting.yaml secret binding, Cloud Build, Cloud Run revision, rollout checks, and live URL evidence.](/lesson-assets/firebase/app-hosting-lab7-green-rollout.svg "Your target state for Lab 7: a healthy rollout with proof that secrets came from Secret Manager.")
+
+## What You Are Building
+
+Your production launch must demonstrate four things:
+
+- The App Hosting backend is connected to the correct GitHub repository, root directory, and live branch.
+- \`apphosting.yaml\` controls compute limits, build/run commands, environment variables, and at least one Secret Manager binding.
+- A commit to the live branch produces a successful build, a healthy Cloud Run revision, and a completed rollout.
+- The hosted URL returns a real page and the secret-dependent feature works without exposing the secret value.
+
+The official Firebase get-started guide demonstrates the console flow with Next.js and Angular. In this lab, follow the same App Hosting backend, GitHub connection, YAML, secret, and rollout evidence flow for your cohort app.
+
+![Official Firebase get-started guide showing the App Hosting backend creation flow.](/lesson-assets/firebase/app-hosting-create-backend.jpg "Use this flow as your visual reference when you create the backend in Firebase Console.")
+
+## Exercise 1 - Prepare the Repository
+
+1. Confirm the app builds locally from a clean checkout.
+2. Confirm the production server binds to \`process.env.PORT\` and \`0.0.0.0\`.
+3. Confirm the repo contains the files App Hosting needs: \`package.json\`, lockfile, server entrypoint, and \`apphosting.yaml\`.
+4. Push only deployable work to the live branch you plan to connect.
+
+\`\`\`bash
+npm run lint
+npm run build
+PORT=8080 npm run start
+curl -I http://localhost:8080
+\`\`\`
+
+PowerShell equivalent:
+
+\`\`\`powershell
+$env:PORT="8080"; npm run start
+curl.exe -I http://localhost:8080
+\`\`\`
+
+## Exercise 2 - Create the App Hosting Backend
+
+Use the Firebase Console for the first backend so you can see the whole managed flow.
+
+1. Open Firebase Console, then go to **Hosting & Serverless > App Hosting**.
+2. Choose **Get started** or **Create backend**.
+3. Select the primary region closest to your users.
+4. Connect GitHub and install/authorize the Firebase GitHub app for the repository.
+5. Set the root directory, usually \`/\` when \`package.json\` is at the repo root.
+6. Set the live branch, normally \`main\` for production or your release branch for review environments.
+7. Keep automatic rollouts enabled for this lab.
+8. Name the backend clearly, such as \`academy-web\`.
+
+CLI alternative after Firebase CLI v13.15.4:
+
+\`\`\`bash
+firebase login
+firebase use <PROJECT_ID>
+firebase apphosting:backends:create --project <PROJECT_ID>
+\`\`\`
+
+The official guide notes that App Hosting gives the backend a no-cost hosted subdomain. Your URL will look like:
+
+\`\`\`text
+https://<backend-id>--<project-id>.<region>.hosted.app
+\`\`\`
+
+## Exercise 3 - Bind Secrets Correctly
+
+App Hosting should receive secret values from Cloud Secret Manager, not from committed \`.env\` files. Create one client-build secret if your Vite bundle needs it and one runtime-only server secret if your app calls Gemini, Stripe, SendGrid, or any other server-side API.
+
+![Official Firebase configuration documentation showing environment variables and secret parameters in apphosting.yaml.](/lesson-assets/firebase/app-hosting-secret-parameters.jpg "Firebase recommends Secret Manager-backed parameters for sensitive values referenced by apphosting.yaml.")
+
+\`\`\`bash
+firebase apphosting:secrets:set firebaseApiKey --project <PROJECT_ID>
+firebase apphosting:secrets:set geminiApiKey --project <PROJECT_ID>
+firebase apphosting:secrets:grantaccess firebaseApiKey --backend <BACKEND_ID> --project <PROJECT_ID>
+firebase apphosting:secrets:grantaccess geminiApiKey --backend <BACKEND_ID> --project <PROJECT_ID>
+\`\`\`
+
+If the CLI offers to add a secret reference to \`apphosting.yaml\`, accept only when the variable name and availability scope match your design. A Vite variable must be available at BUILD time because Vite inlines \`VITE_*\` values during compilation. A server-only API key should be RUNTIME only.
+
+## Exercise 4 - Configure apphosting.yaml
+
+Start with this pattern, then adapt names and limits to your app:
+
+\`\`\`yaml
+scripts:
+  buildCommand: npm run build
+  runCommand: npm run start
+
+runConfig:
+  minInstances: 0
+  maxInstances: 4
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: NODE_ENV
+    value: production
+    availability: [BUILD, RUNTIME]
+
+  - variable: VITE_FIREBASE_PROJECT_ID
+    value: <PROJECT_ID>
+    availability: [BUILD]
+
+  - variable: VITE_FIREBASE_API_KEY
+    secret: firebaseApiKey
+    availability: [BUILD]
+
+  - variable: GEMINI_API_KEY
+    secret: geminiApiKey
+    availability: [RUNTIME]
+\`\`\`
+
+Checklist before committing:
+
+- No raw secret values appear in git history, \`apphosting.yaml\`, screenshots, terminal output, or build logs.
+- \`VITE_*\` values needed by the browser are BUILD scoped.
+- Server-only values are RUNTIME scoped.
+- \`scripts.runCommand\` starts the server that listens on App Hosting's assigned \`PORT\`.
+- \`runConfig\` has realistic limits for the lab: low minimum instances, bounded maximum instances, and enough memory for the build.
+
+## Exercise 5 - Trigger and Monitor the Rollout
+
+Commit the YAML and push to the live branch. App Hosting should start a rollout automatically.
+
+\`\`\`bash
+git add apphosting.yaml package.json package-lock.json
+git commit -m "Configure Firebase App Hosting production launch"
+git push origin main
+firebase apphosting:rollouts:list --backend <BACKEND_ID> --project <PROJECT_ID>
+\`\`\`
+
+If you need to force a rollout without another commit, use:
+
+\`\`\`bash
+firebase apphosting:rollouts:create <BACKEND_ID> --project <PROJECT_ID>
+\`\`\`
+
+![Official Firebase rollouts documentation showing where rollout status, build links, commit links, and rollout history are reviewed.](/lesson-assets/firebase/app-hosting-rollouts.jpg "Use the Rollouts tab as your screenshot target after the status is healthy.")
+
+## Exercise 6 - Prove the Launch
+
+Capture evidence while the rollout is still easy to trace:
+
+1. Screenshot of the backend connected to the correct repo and live branch.
+2. Redacted proof that the Secret Manager binding exists and access was granted.
+3. Screenshot of the Rollouts tab showing the current rollout is healthy.
+4. The deployed hosted URL.
+5. HTTP proof from your terminal.
+6. Screenshot of the secret-dependent feature working in production.
+7. A short reflection explaining what failed, how you debugged it, and what you would monitor next.
+
+\`\`\`bash
+curl -I https://<backend-id>--<project-id>.<region>.hosted.app
+curl -fsS https://<backend-id>--<project-id>.<region>.hosted.app/healthz
+\`\`\`
+
+## Troubleshooting Fast Path
+
+| Symptom | First check | Likely fix |
+|---|---|---|
+| Build succeeds, rollout unhealthy | Cloud Run revision logs | Fix \`PORT\`, \`0.0.0.0\`, or \`npm run start\` |
+| \`import.meta.env.VITE_*\` is undefined | BUILD availability | Add BUILD scope and redeploy |
+| Secret works locally but not in prod | Secret access grant | Run \`apphosting:secrets:grantaccess\` for the backend |
+| Rollout never starts | GitHub connection and live branch | Reconnect repo or push to the configured branch |
+| Feature works but secret is visible | Client bundle boundary | Move server-only secret use behind an API route |
 
 Complete the lab in the **Lab Studio** panel below and submit your deployed URL for verification.
 `,
     notes: {
-      coreConcepts: "A production deploy is only done when the rollout is green, the URL serves, and secrets came from Secret Manager — not .env files in the image.",
-      proTip: "If the build succeeds but the rollout hangs 'unhealthy', it's almost always the PORT/0.0.0.0 contract or a missing start script — check revision logs first.",
+      coreConcepts: "A production deploy is only done when the rollout is healthy, the URL serves, and secret values came from Secret Manager rather than .env files or committed YAML.",
+      proTip: "If the build succeeds but the rollout hangs unhealthy, check revision logs first. Most failures are the PORT/0.0.0.0 contract, a missing start script, or a runtime-only value that was needed during BUILD.",
       keyTerms: [
-        { term: "Green Rollout", definition: "A deployment that passed build, health checks, and full traffic migration." }
+        { term: "Green Rollout", definition: "A deployment that passed build, health checks, and traffic migration to the new revision." },
+        { term: "Live Branch", definition: "The Git branch App Hosting watches for automatic production rollouts." },
+        { term: "Secret Binding", definition: "An apphosting.yaml reference to a Secret Manager secret that App Hosting injects at build time or runtime." }
       ]
     },
     resources: [
-      { name: "App Hosting GitHub Integration", url: "https://firebase.google.com/docs/app-hosting/get-started", type: "docs" }
+      { name: "Firebase App Hosting Overview", url: "https://firebase.google.com/docs/app-hosting", type: "docs" },
+      { name: "App Hosting Get Started", url: "https://firebase.google.com/docs/app-hosting/get-started", type: "docs" },
+      { name: "Configure App Hosting Backends", url: "https://firebase.google.com/docs/app-hosting/configure", type: "docs" },
+      { name: "Manage Rollouts and Releases", url: "https://firebase.google.com/docs/app-hosting/rollouts", type: "docs" },
+      { name: "Firebase After Hours - App Hosting", url: "https://www.youtube.com/watch?v=KWQeElH4pSk", type: "video" }
     ]
   }
 ];

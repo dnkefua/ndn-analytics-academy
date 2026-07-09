@@ -151,21 +151,25 @@ export const LABS: Lab[] = [
     title: "Lab 7: Production Launch on App Hosting",
     summary: "Connect your repo, configure apphosting.yaml with a secret binding, and complete a green rollout.",
     instructions: [
-      "Create an App Hosting backend connected to your GitHub repo's main branch.",
-      "Write apphosting.yaml with runConfig limits and env entries — VITE_* variables with BUILD availability, one Secret Manager secret with grantaccess.",
-      "Push a commit and monitor the rollout to green; capture the build and rollout status.",
-      "Verify the live URL serves your app and the secret-dependent feature works.",
-      "Submit apphosting.yaml, the live URL, and rollout evidence."
+      "Study the Lesson 7.3 Firebase App Hosting screenshots and embedded videos before touching production.",
+      "Run npm run lint and npm run build locally; then start the production server on PORT=8080 and prove it returns HTTP 200.",
+      "Create an App Hosting backend connected to the correct GitHub repo, root directory, and live branch; keep automatic rollouts enabled.",
+      "Create at least one Secret Manager value with firebase apphosting:secrets:set and grant backend access with firebase apphosting:secrets:grantaccess.",
+      "Write apphosting.yaml with scripts, runConfig limits, BUILD-scoped VITE_* variables, and one RUNTIME-only server secret binding.",
+      "Push a commit to the live branch, monitor the rollout in Firebase Console or the CLI, and capture the green rollout state.",
+      "Verify the live URL with curl -I and a browser screenshot; prove the secret-dependent feature works without exposing raw secret values.",
+      "Submit apphosting.yaml, backend/repo screenshot, redacted secret binding proof, green rollout screenshot, live URL, curl output, and reflection."
     ],
-    starterCode: `runConfig:\n  minInstances: 0\n  maxInstances: 4\n  memoryMiB: 512\n\nenv:\n  - variable: VITE_FIREBASE_API_KEY\n    secret: firebaseApiKey\n    availability: [BUILD, RUNTIME]`,
-    expectedOutput: "Rollout complete — backend serving at https://academy--ndn.europe-west4.hosted.app",
+    starterCode: `scripts:\n  buildCommand: npm run build\n  runCommand: npm run start\n\nrunConfig:\n  minInstances: 0\n  maxInstances: 4\n  concurrency: 80\n  cpu: 1\n  memoryMiB: 512\n\nenv:\n  - variable: NODE_ENV\n    value: production\n    availability: [BUILD, RUNTIME]\n\n  - variable: VITE_FIREBASE_PROJECT_ID\n    value: <PROJECT_ID>\n    availability: [BUILD]\n\n  - variable: VITE_FIREBASE_API_KEY\n    secret: firebaseApiKey\n    availability: [BUILD]\n\n  - variable: GEMINI_API_KEY\n    secret: geminiApiKey\n    availability: [RUNTIME]`,
+    expectedOutput: "Rollout complete - live URL returns HTTP 200 and Firebase Console shows a healthy current rollout.",
     validationType: "url_check",
-    requiredEvidence: ["code", "deployed_url", "reflection"],
+    requiredEvidence: ["code", "repo_url", "deployed_url", "screenshot", "reflection"],
     rubric: [
-      { id: "fb7-r1", label: "YAML Correctness", description: "runConfig and env scopes (BUILD vs RUNTIME) correct.", maxPoints: 30 },
-      { id: "fb7-r2", label: "Secret Binding", description: "Secret referenced from Secret Manager with granted access — no committed values.", maxPoints: 30 },
-      { id: "fb7-r3", label: "Green Rollout", description: "Git-triggered rollout completes healthy.", maxPoints: 25 },
-      { id: "fb7-r4", label: "Live Verification", description: "Deployed URL serves with secrets functioning.", maxPoints: 15 }
+      { id: "fb7-r1", label: "Backend Connection", description: "App Hosting backend is connected to the intended GitHub repo, root directory, live branch, and automatic rollout setting.", maxPoints: 20 },
+      { id: "fb7-r2", label: "YAML Correctness", description: "scripts, runConfig, env scopes, BUILD VITE_* values, and RUNTIME server secrets are correctly declared.", maxPoints: 25 },
+      { id: "fb7-r3", label: "Secret Binding", description: "Secret referenced from Secret Manager with backend access granted and no raw values committed or shown.", maxPoints: 25 },
+      { id: "fb7-r4", label: "Green Rollout", description: "Git-triggered or manually triggered rollout completes with build link, commit link, and healthy current rollout evidence.", maxPoints: 20 },
+      { id: "fb7-r5", label: "Live Verification", description: "Hosted URL returns HTTP 200 and the secret-dependent production feature works.", maxPoints: 10 }
     ]
   },
 

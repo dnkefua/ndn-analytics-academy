@@ -36,7 +36,7 @@ export const pricingPlans: PricingPlan[] = [
     price: "$650",
     label: "Recommended",
     positioning: "Main cohort price",
-    cta: "Apply Now",
+    cta: "Enroll Now",
     recommended: true,
     includes: [
       "Everything in Early Bird",
@@ -53,7 +53,7 @@ export const pricingPlans: PricingPlan[] = [
     price: "$1,200",
     label: "Extra support for serious founders",
     positioning: "Best for founders who want personalized MVP guidance",
-    cta: "Apply for Premium Support",
+    cta: "Enroll for Premium Support",
     limitedNote: "Premium support is limited to 3 students.",
     includes: [
       "Everything in Standard",

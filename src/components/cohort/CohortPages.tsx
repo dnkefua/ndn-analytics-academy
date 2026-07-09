@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
 import {
   BadgeDollarSign,
   BookOpen,
@@ -30,7 +31,6 @@ import { RevenueTarget } from "./RevenueTarget";
 import { StudentDashboardPreview } from "./StudentDashboardPreview";
 import { WeeklyLessonTemplate } from "./WeeklyLessonTemplate";
 import {
-  COHORT_APPLICATION_FORM_URL,
   COHORT_LEAD_EMAIL,
   applicationSteps,
   audiences,
@@ -53,6 +53,8 @@ import { cohortAds } from "../../data/cohortAds";
 import { curriculumWeeks, getWeekBySlug } from "../../data/curriculum";
 import { cohortFaqs } from "../../data/faqs";
 import { pricingOptionLabels, pricingPlans, type PricingPlan } from "../../data/pricing";
+import { trackFormSubmit } from "../../lib/analytics";
+import { addEngagement, attributeAnonymousEngagements, createLead } from "../../lib/leads";
 import {
   certificateAttendanceRules,
   certificateCompletionRequirements,
@@ -65,10 +67,15 @@ const navLinks = [
   { label: "Courses", href: "/" },
   { label: "Cohort 1", href: "/cohort-1" },
   { label: "Curriculum", href: "/courses/ai-mvp-builder-africa/curriculum" },
-  { label: "Apply", href: "/apply" },
+  { label: "Enroll", href: "/enroll" },
   { label: "Dashboard", href: "/student-dashboard" },
   { label: "Certificate", href: "/certificate-preview" },
 ];
+
+const EJS_SERVICE = import.meta.env.VITE_EMAILJS_SERVICE_ID || "";
+const EJS_TEMPLATE = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "";
+const EJS_PUBLIC = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "";
+const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${COHORT_LEAD_EMAIL}`;
 
 function CohortNavigation() {
   const [open, setOpen] = useState(false);
@@ -110,10 +117,10 @@ function CohortNavigation() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <Link
-            to="/apply"
+            to="/enroll"
             className="inline-flex min-h-11 items-center rounded-lg bg-[#F5B400] px-5 py-2 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
           >
-            Apply Now
+            Enroll Now
           </Link>
         </div>
 
@@ -141,11 +148,11 @@ function CohortNavigation() {
               </Link>
             ))}
             <Link
-              to="/apply"
+              to="/enroll"
               onClick={() => setOpen(false)}
               className="mt-2 inline-flex min-h-12 items-center justify-center rounded-lg bg-[#F5B400] px-5 py-3 text-sm font-black text-[#071527]"
             >
-              Apply Now
+              Enroll Now
             </Link>
           </div>
         </div>
@@ -172,7 +179,7 @@ function CohortFooter() {
           {[
             ["AI MVP Builder Africa", "/cohort-1"],
             ["Curriculum", "/courses/ai-mvp-builder-africa/curriculum"],
-            ["Apply", "/apply"],
+            ["Enroll", "/enroll"],
             ["Certificate Preview", "/certificate-preview"],
           ].map(([label, href]) => (
             <Link key={href} to={href} className="mb-2 block text-sm font-semibold text-slate-300 hover:text-white">
@@ -469,7 +476,7 @@ export function CohortLandingPage() {
         <InstructorCredibility />
       </Section>
 
-      <Section eyebrow="Application Process" title="Apply, confirm, and start building">
+      <Section eyebrow="Enrollment Process" title="Enroll, confirm, and start building">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {applicationSteps.map((step, index) => (
             <div key={step} className="rounded-lg border border-white/12 bg-white/6 p-5">
@@ -481,10 +488,10 @@ export function CohortLandingPage() {
           ))}
         </div>
         <Link
-          to="/apply"
+          to="/enroll"
           className="mt-6 inline-flex min-h-12 items-center justify-center rounded-lg bg-[#F5B400] px-6 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
         >
-          Apply for Cohort 1
+          Enroll for Cohort 1
         </Link>
       </Section>
 
@@ -515,8 +522,8 @@ export function CohortCourseOverviewPage() {
           </h1>
           <p className="mt-5 text-lg leading-8 text-slate-200">{cohortInfo.promise}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link to="/apply" className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[#F5B400] px-6 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]">
-              Apply Now
+            <Link to="/enroll" className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[#F5B400] px-6 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]">
+              Enroll Now
             </Link>
             <Link to="/courses/ai-mvp-builder-africa/curriculum" className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/12 bg-white/8 px-6 py-3 text-sm font-bold text-white hover:border-[#3FA9F5]/50">
               View Curriculum
@@ -638,34 +645,49 @@ export function ApplyPage() {
   const selectedPlan = searchParams.get("plan");
   const defaultPlan: PricingPlan["id"] =
     pricingPlans.find((plan) => plan.id === selectedPlan)?.id || "standard";
+  const formRef = useRef<HTMLFormElement>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [deliveryStatus, setDeliveryStatus] = useState<"idle" | "sending" | "sent" | "fallback" | "error">("idle");
   const [preferredPlan, setPreferredPlan] = useState(defaultPlan);
-  const [leadMailHref, setLeadMailHref] = useState(getCohortLeadMailto("AI MVP Builder Africa Cohort 1 Application"));
+  const [leadMailHref, setLeadMailHref] = useState(getCohortLeadMailto("AI MVP Builder Africa Cohort 1 Enrollment"));
 
   const preferredPlanLabel = useMemo(() => {
     const plan = pricingPlans.find((item) => item.id === preferredPlan);
     return plan ? `${plan.name} - ${plan.price}` : pricingOptionLabels[1];
   }, [preferredPlan]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setDeliveryStatus("sending");
+    trackFormSubmit("cohort_enrollment");
+
     const formData = new FormData(event.currentTarget);
     const read = (name: string) => String(formData.get(name) || "").trim();
+    const checked = (name: string) => formData.getAll(name).map((item) => String(item).trim()).filter(Boolean);
     const selectedPlanLabel =
       pricingPlans.find((item) => item.id === preferredPlan)?.name || "Standard";
+    const fullName = read("fullName");
+    const emailAddress = read("email");
+    const whatsapp = read("whatsapp");
     const emailBody = [
-      "New AI MVP Builder Africa - Cohort 1 application",
+      "New AI MVP Builder Africa - Cohort 1 enrollment",
       "",
-      `Full name: ${read("fullName")}`,
-      `Email address: ${read("email")}`,
-      `WhatsApp number: ${read("whatsapp")}`,
+      `Full name: ${fullName}`,
+      `Email address: ${emailAddress}`,
+      `WhatsApp number: ${whatsapp}`,
       `Country: ${read("country")}`,
       `City: ${read("city")}`,
       `Current role: ${read("role")}`,
       `Technical level: ${read("technicalLevel")}`,
       `Has app idea: ${read("hasIdea")}`,
+      `Current stage: ${read("currentStage")}`,
       `Preferred pricing option: ${selectedPlanLabel} (${preferredPlanLabel})`,
       `Can attend live sessions: ${read("canAttendLive")}`,
+      `Start timeline: ${read("startTimeline")}`,
+      `Enrollment/payment readiness: ${read("paymentReadiness")}`,
+      `Completion seriousness: ${read("seriousness")}/5`,
+      `Goals: ${checked("goals").join(", ")}`,
+      `Consent: ${checked("consent").join(" | ")}`,
       `How they heard about us: ${read("referral")}`,
       "",
       "App idea:",
@@ -673,19 +695,110 @@ export function ApplyPage() {
       "",
       "Why they want to join:",
       read("motivation"),
+      "",
+      "Biggest question or concern:",
+      read("concern"),
     ].join("\n");
     const mailHref = `mailto:${COHORT_LEAD_EMAIL}?subject=${encodeURIComponent(
-      "AI MVP Builder Africa Cohort 1 Application"
+      "AI MVP Builder Africa Cohort 1 Enrollment"
     )}&body=${encodeURIComponent(emailBody)}`;
     setLeadMailHref(mailHref);
-    // TODO: Add Meta Pixel event: CohortApplicationSubmitted
-    // TODO: Add GA4 event: cohort_application_form_submitted
-    setSubmitted(true);
-    window.open(mailHref, "_blank", "noopener,noreferrer");
-  };
 
-  const handleExternalClick = () => {
-    // TODO: Track external application form click tracking
+    try {
+      const lead = await createLead({
+        email: emailAddress,
+        name: fullName,
+        source: "cohort_enrollment",
+        productInterests: ["AI MVP Builder Africa"],
+        tags: ["cohort_1", "academy", "ai_mvp_builder_africa", selectedPlanLabel.toLowerCase().replace(/\s+/g, "_")],
+      });
+
+      if (lead?.id) {
+        await attributeAnonymousEngagements(lead.id);
+        await addEngagement(lead.id, "form_submit", {
+          form: "cohort_enrollment",
+          preferredPlan: selectedPlanLabel,
+          technicalLevel: read("technicalLevel"),
+          paymentReadiness: read("paymentReadiness"),
+          seriousness: read("seriousness"),
+        });
+      }
+    } catch (error) {
+      console.warn("Cohort lead storage failed; continuing with email delivery.", error);
+    }
+
+    const emailParams = {
+      to_email: COHORT_LEAD_EMAIL,
+      from_name: fullName,
+      from_email: emailAddress,
+      reply_to: emailAddress,
+      subject: "AI MVP Builder Africa Cohort 1 Enrollment",
+      message: emailBody,
+      full_name: fullName,
+      whatsapp,
+      country: read("country"),
+      city: read("city"),
+      current_role: read("role"),
+      technical_level: read("technicalLevel"),
+      current_stage: read("currentStage"),
+      preferred_plan: `${selectedPlanLabel} (${preferredPlanLabel})`,
+      payment_readiness: read("paymentReadiness"),
+      start_timeline: read("startTimeline"),
+      seriousness: read("seriousness"),
+    };
+
+    if (EJS_SERVICE && EJS_TEMPLATE && EJS_PUBLIC) {
+      try {
+        await emailjs.send(
+          EJS_SERVICE,
+          EJS_TEMPLATE,
+          emailParams,
+          { publicKey: EJS_PUBLIC }
+        );
+        setSubmitted(true);
+        setDeliveryStatus("sent");
+        formRef.current?.reset();
+        return;
+      } catch (error) {
+        console.error("EmailJS cohort enrollment delivery failed.", error);
+      }
+    }
+
+    try {
+      const response = await fetch(FORMSUBMIT_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          _subject: "AI MVP Builder Africa Cohort 1 Enrollment",
+          _template: "table",
+          _captcha: "false",
+          name: fullName,
+          email: emailAddress,
+          phone: whatsapp,
+          message: emailBody,
+          preferred_plan: `${selectedPlanLabel} (${preferredPlanLabel})`,
+          payment_readiness: read("paymentReadiness"),
+          start_timeline: read("startTimeline"),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (response.ok && String(result.success) !== "false") {
+        setSubmitted(true);
+        setDeliveryStatus("sent");
+        formRef.current?.reset();
+        return;
+      }
+    } catch (error) {
+      console.warn("FormSubmit cohort enrollment delivery failed; falling back to mailto.", error);
+    }
+
+    setSubmitted(true);
+    setDeliveryStatus("fallback");
+    window.open(mailHref, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -700,53 +813,60 @@ export function ApplyPage() {
           <div>
             <CohortBadge tone="gold">Only 10 students accepted</CohortBadge>
             <h1 className="mt-5 text-4xl font-black text-white sm:text-5xl">
-              Apply for AI MVP Builder Africa - Cohort 1
+              Enroll for AI MVP Builder Africa - Cohort 1
             </h1>
             <p className="mt-5 text-base leading-7 text-slate-300">
-              Only 10 students will be accepted into the first cohort. Complete the application
-              below to reserve your opportunity.
+              Only 10 students will be accepted into the first cohort. Complete the enrollment
+              form below and your details will be sent directly to NDN Analytics.
             </p>
             <div className="mt-6 rounded-lg border border-[#F5B400]/35 bg-[#F5B400]/10 p-5 text-sm leading-7 text-slate-200">
-              Applications and cohort leads are routed to{" "}
+              Enrollment leads are routed to{" "}
               <a href={getCohortLeadMailto("AI MVP Builder Africa Cohort 1 Lead")} className="font-black text-[#FDE68A] underline">
                 {COHORT_LEAD_EMAIL}
               </a>
-              . This frontend preview opens a prefilled email after submission so the lead details can be sent directly.
+              . The form sends the applicant details by email and also stores a cohort lead when Firebase is available.
             </div>
             <div className="mt-6 rounded-lg border border-[#3FA9F5]/35 bg-[#3FA9F5]/10 p-5">
               <p className="text-sm font-bold text-white">Selected pricing option</p>
               <p className="mt-2 text-2xl font-black text-[#F5B400]">{preferredPlanLabel}</p>
             </div>
             <a
-              href={COHORT_APPLICATION_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleExternalClick}
+              href={getCohortLeadMailto("AI MVP Builder Africa Cohort 1 Enrollment Question")}
               className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/8 px-5 py-3 text-sm font-black text-white hover:border-[#3FA9F5]/50"
             >
-              Email Application / Open Form
-              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Ask a question by email
+              <Mail className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
 
           <div className="rounded-lg border border-white/12 bg-white/6 p-5 sm:p-6">
             {submitted ? (
-              <div className="rounded-lg border border-[#22C55E]/35 bg-[#22C55E]/10 p-6 text-center">
-                <CheckCircle2 className="mx-auto h-12 w-12 text-[#22C55E]" aria-hidden="true" />
-                <h2 className="mt-4 text-2xl font-black text-white">Application received.</h2>
+              <div className={`rounded-lg border p-6 text-center ${
+                deliveryStatus === "sent"
+                  ? "border-[#22C55E]/35 bg-[#22C55E]/10"
+                  : "border-[#F5B400]/35 bg-[#F5B400]/10"
+              }`}>
+                <CheckCircle2 className={`mx-auto h-12 w-12 ${
+                  deliveryStatus === "sent" ? "text-[#22C55E]" : "text-[#F5B400]"
+                }`} aria-hidden="true" />
+                <h2 className="mt-4 text-2xl font-black text-white">Enrollment received.</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
-                  Your email client should open with a prefilled message to {COHORT_LEAD_EMAIL}. Send that email so our team can contact you with the next steps.
+                  {deliveryStatus === "sent"
+                    ? `The enrollment details were sent directly to ${COHORT_LEAD_EMAIL}. Nkefua and the NDN Analytics team will follow up with the next step.`
+                    : `The page prepared the enrollment details for ${COHORT_LEAD_EMAIL}. Use the backup email button below so no lead information is lost.`}
                 </p>
-                <a
-                  href={leadMailHref}
-                  className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#F5B400] px-5 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
-                >
-                  Send Application Email
-                  <Mail className="h-4 w-4" aria-hidden="true" />
-                </a>
+                {deliveryStatus !== "sent" && (
+                  <a
+                    href={leadMailHref}
+                    className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#F5B400] px-5 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
+                  >
+                    Send Backup Enrollment Email
+                    <Mail className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                )}
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="grid gap-4">
+              <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <TextInput label="Full name" name="fullName" required />
                   <TextInput label="Email address" name="email" type="email" required />
@@ -774,6 +894,17 @@ export function ApplyPage() {
                   </select>
                 </label>
 
+                <label className="grid gap-2 text-sm font-bold text-slate-200">
+                  What stage are you currently at?
+                  <select name="currentStage" className={inputClass} required>
+                    <option value="I only have an idea">I only have an idea</option>
+                    <option value="I have written notes or a rough plan">I have written notes or a rough plan</option>
+                    <option value="I have designs or wireframes">I have designs or wireframes</option>
+                    <option value="I have started building">I have started building</option>
+                    <option value="I already have an MVP and need launch help">I already have an MVP and need launch help</option>
+                  </select>
+                </label>
+
                 <TextArea label="Describe your app idea" name="appIdea" />
                 <TextArea label="Why do you want to join this cohort?" name="motivation" required />
 
@@ -794,6 +925,27 @@ export function ApplyPage() {
                   </select>
                 </label>
 
+                <fieldset className="rounded-lg border border-white/12 bg-[#06101f] p-4">
+                  <legend className="px-1 text-sm font-bold text-slate-200">What do you want to achieve?</legend>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {[
+                      "Define a clear MVP idea",
+                      "Design app screens and user flow",
+                      "Build frontend structure",
+                      "Create Firebase/backend data plan",
+                      "Add an AI-powered feature",
+                      "Prepare a demo and launch plan",
+                      "Build a portfolio project",
+                      "Learn enough to manage developers better",
+                    ].map((goal) => (
+                      <label key={goal} className="flex items-start gap-2 text-sm font-semibold text-slate-300">
+                        <input type="checkbox" name="goals" value={goal} className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-950 accent-[#F5B400]" />
+                        {goal}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
                 <label className="grid gap-2 text-sm font-bold text-slate-200">
                   Can you attend live sessions?
                   <select name="canAttendLive" className={inputClass} required>
@@ -803,13 +955,66 @@ export function ApplyPage() {
                   </select>
                 </label>
 
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="grid gap-2 text-sm font-bold text-slate-200">
+                    How soon do you want to start?
+                    <select name="startTimeline" className={inputClass} required>
+                      <option value="Immediately / next available cohort">Immediately / next available cohort</option>
+                      <option value="Within 2 weeks">Within 2 weeks</option>
+                      <option value="Within 30 days">Within 30 days</option>
+                      <option value="I am exploring options">I am exploring options</option>
+                      <option value="I want this for my team or organization">I want this for my team or organization</option>
+                    </select>
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-bold text-slate-200">
+                    Enrollment/payment readiness
+                    <select name="paymentReadiness" className={inputClass} required>
+                      <option value="I am ready to enroll now">I am ready to enroll now</option>
+                      <option value="Send me the enrollment invoice/details">Send me the enrollment invoice/details</option>
+                      <option value="I need a short call before enrolling">I need a short call before enrolling</option>
+                      <option value="I need a payment plan">I need a payment plan</option>
+                      <option value="My employer or sponsor will pay">My employer or sponsor will pay</option>
+                      <option value="I need pricing details first">I need pricing details first</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label className="grid gap-2 text-sm font-bold text-slate-200">
+                  How serious are you about completing the 6-week cohort?
+                  <select name="seriousness" className={inputClass} required>
+                    <option value="5">5 - Very serious</option>
+                    <option value="4">4 - Serious</option>
+                    <option value="3">3 - Interested but need details</option>
+                    <option value="2">2 - Exploring</option>
+                    <option value="1">1 - Not sure yet</option>
+                  </select>
+                </label>
+
+                <TextArea label="What is your biggest question or concern before joining?" name="concern" />
                 <TextInput label="How did you hear about us?" name="referral" />
+
+                <fieldset className="rounded-lg border border-[#F5B400]/30 bg-[#F5B400]/10 p-4">
+                  <legend className="px-1 text-sm font-black text-[#FDE68A]">Consent</legend>
+                  <div className="mt-3 grid gap-3">
+                    {[
+                      "I agree that NDN Analytics may contact me by email or WhatsApp about this cohort.",
+                      "I understand this is a professional paid cohort and enrollment details will be sent after review.",
+                    ].map((item) => (
+                      <label key={item} className="flex items-start gap-2 text-sm font-semibold text-slate-200">
+                        <input type="checkbox" name="consent" value={item} required className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-950 accent-[#F5B400]" />
+                        {item}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
 
                 <button
                   type="submit"
                   className="mt-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#F5B400] px-6 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
+                  disabled={deliveryStatus === "sending"}
                 >
-                  Submit Application
+                  {deliveryStatus === "sending" ? "Sending Enrollment..." : "Submit Enrollment"}
                   <Send className="h-4 w-4" aria-hidden="true" />
                 </button>
               </form>

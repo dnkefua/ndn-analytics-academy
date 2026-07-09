@@ -243,6 +243,7 @@ export default function App() {
       <Route path="/courses/ai-mvp-builder-africa" element={<CohortCourseOverviewPage />} />
       <Route path="/courses/ai-mvp-builder-africa/curriculum" element={<CurriculumPage />} />
       <Route path="/courses/ai-mvp-builder-africa/:weekSlug" element={<WeekLessonPage />} />
+      <Route path="/enroll" element={<ApplyPage />} />
       <Route path="/apply" element={<ApplyPage />} />
       <Route path="/student-dashboard" element={<StudentDashboardPage />} />
       <Route path="/certificate-preview" element={<CertificatePreviewPage />} />

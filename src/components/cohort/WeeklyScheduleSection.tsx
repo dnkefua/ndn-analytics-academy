@@ -46,10 +46,10 @@ export function WeeklyScheduleSection({ schedule }: WeeklyScheduleSectionProps) 
           Back to Curriculum
         </Link>
         <Link
-          to="/apply"
+          to="/enroll"
           className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[#F5B400] px-5 py-3 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
         >
-          Apply for Cohort 1
+          Enroll for Cohort 1
         </Link>
       </div>
     </section>

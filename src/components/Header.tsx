@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   const routeLinks = [
     { href: '/cohort-1', label: 'Cohort 1' },
     { href: '/courses/ai-mvp-builder-africa/curriculum', label: 'Curriculum' },
-    { href: '/apply', label: 'Apply' },
+    { href: '/enroll', label: 'Enroll' },
   ];
 
   return (
@@ -136,10 +136,10 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           <Link
-            to="/apply"
+            to="/enroll"
             className="hidden lg:inline-flex min-h-10 items-center rounded-lg bg-amber-400 px-4 py-2 text-xs font-black text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-300"
           >
-            Apply Now
+            Enroll Now
           </Link>
           <div className="text-right hidden lg:block">
             <span className="text-xs font-bold text-white block">{studentName}</span>

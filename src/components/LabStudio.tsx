@@ -18,6 +18,7 @@ export const LabStudio: React.FC<LabStudioProps> = ({
   const [submittedCode, setSubmittedCode] = useState(existingSubmission?.submittedCode || lab.starterCode || "");
   const [repoUrl, setRepoUrl] = useState(existingSubmission?.repoUrl || "");
   const [deployedUrl, setDeployedUrl] = useState(existingSubmission?.deployedUrl || "");
+  const [screenshotEvidence, setScreenshotEvidence] = useState((existingSubmission?.screenshotUrls || []).join("\n"));
   const [reflection, setReflection] = useState(existingSubmission?.reflection || "");
 
   const [validationResult, setValidationResult] = useState<LabValidationResult | null>(
@@ -29,6 +30,7 @@ export const LabStudio: React.FC<LabStudioProps> = ({
           checklistPassed: true,
           repoValid: true,
           deployedUrlValid: true,
+          screenshotValid: true,
           codeKeywordsValid: true,
           reflectionValid: true,
         }
@@ -42,12 +44,18 @@ export const LabStudio: React.FC<LabStudioProps> = ({
   };
 
   const handleSubmitLab = () => {
+    const screenshotUrls = screenshotEvidence
+      .split(/\r?\n|,/)
+      .map(url => url.trim())
+      .filter(Boolean);
+
     const result = validateLabSubmission(
       lab,
       {
         submittedCode,
         repoUrl,
         deployedUrl,
+        screenshotUrls,
         reflection,
       },
       allChecklistDone
@@ -63,6 +71,7 @@ export const LabStudio: React.FC<LabStudioProps> = ({
       repoUrl,
       deployedUrl,
       submittedCode,
+      screenshotUrls,
       reflection,
       score: result.score,
       feedback: result.feedback,
@@ -197,6 +206,24 @@ export const LabStudio: React.FC<LabStudioProps> = ({
               />
             </div>
           )}
+
+          {/* Screenshot / Recording Evidence */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+              <FileText className="w-3.5 h-3.5 text-amber-400" />
+              <span>
+                Screenshot / Recording Evidence Links
+                {lab.requiredEvidence.includes("screenshot") ? " (Required)" : " (Optional)"}
+              </span>
+            </label>
+            <textarea
+              value={screenshotEvidence}
+              onChange={(e) => setScreenshotEvidence(e.target.value)}
+              rows={3}
+              placeholder="Paste HTTPS links to screenshots, Loom videos, console captures, or shared evidence folders. One per line."
+              className="w-full px-3.5 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
 
           {/* Reflection */}
           {lab.requiredEvidence.includes("reflection") && (

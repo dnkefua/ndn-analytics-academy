@@ -5,6 +5,7 @@ import { MODULES } from '../data/modules';
 import { LESSONS } from '../data/lessons';
 import { LABS } from '../data/labs';
 import { LabStudio } from './LabStudio';
+import { LabEvidenceGuide } from './LabEvidenceGuide';
 import { Markdown } from './Markdown';
 import { setLastLesson } from '../services/localProgressStore';
 import { ArrowLeft, ArrowRight, CheckCircle, Play, BookOpen, Terminal, HelpCircle, FileText, Download, Award, ChevronDown, ChevronRight, Clock } from 'lucide-react';
@@ -54,6 +55,7 @@ export const LessonView: React.FC<LessonViewProps> = ({
   const activeIndex = courseLessons.findIndex(l => l.id === activeLesson.id);
   const prevLesson = activeIndex > 0 ? courseLessons[activeIndex - 1] : null;
   const nextLesson = activeIndex < courseLessons.length - 1 ? courseLessons[activeIndex + 1] : null;
+  const activeModuleVideoLesson = courseLessons.find(l => l.moduleId === activeModule?.id && l.type === 'video');
 
   // Course progress + estimated time remaining (visible-progress principle)
   const completedInCourse = courseLessons.filter(l => learnerProgress.completedLessonIds.includes(l.id)).length;
@@ -233,6 +235,14 @@ export const LessonView: React.FC<LessonViewProps> = ({
               <div className="bg-slate-950/60 p-6 sm:p-8 rounded-xl border border-slate-800/80">
                 <Markdown source={activeLesson.readingMarkdown} />
               </div>
+            )}
+
+            {/* Official documentation, video, screenshots, and evidence guide for every practical lab */}
+            {activeLesson.type === 'lab' && currentLab && (
+              <LabEvidenceGuide
+                lab={currentLab}
+                videoLesson={activeModuleVideoLesson}
+              />
             )}
 
             {/* Embedded Practical Lab Studio if Type is Lab */}

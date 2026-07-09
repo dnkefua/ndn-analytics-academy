@@ -22,10 +22,10 @@ export function WeeklyLessonTemplate({ lesson }: WeeklyLessonTemplateProps) {
           Back to curriculum
         </Link>
         <Link
-          to="/apply"
+          to="/enroll"
           className="inline-flex items-center rounded-lg bg-[#F5B400] px-4 py-2 text-sm font-black text-[#071527] hover:bg-[#FFD166]"
         >
-          Apply
+          Enroll
         </Link>
       </div>
 

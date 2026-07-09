@@ -44,11 +44,11 @@ export function CohortHero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              to="/apply"
+              to="/enroll"
               onClick={handleApplyClick}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#F5B400] px-6 py-3 text-sm font-black text-[#071527] shadow-lg shadow-[#F5B400]/20 transition hover:bg-[#FFD166]"
             >
-              Apply for Cohort 1
+              Enroll for Cohort 1
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link

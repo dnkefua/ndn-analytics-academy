@@ -161,6 +161,7 @@ function getInitialScore(source: LeadSource): number {
     newsletter_blog: 10,
     exit_intent: 5,
     fine_tuning_teaser: 20,
+    cohort_enrollment: 35,
   };
   return scores[source] || 5;
 }

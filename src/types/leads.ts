@@ -7,6 +7,7 @@ export type LeadSource =
   | 'content_upgrade'
   | 'aria_chat'
   | 'contact_form'
+  | 'cohort_enrollment'
   | 'exit_intent'
   | 'fine_tuning_teaser';
 
@@ -63,6 +64,7 @@ export interface IntentSignal {
 export const SCORE_WEIGHTS = {
   // Source scores
   contact_form: 25,
+  cohort_enrollment: 35,
   aria_chat: 20,
   content_upgrade: 15,
   newsletter_footer: 10,

@@ -7,6 +7,7 @@ export interface LabValidationResult {
   checklistPassed: boolean;
   repoValid: boolean;
   deployedUrlValid: boolean;
+  screenshotValid: boolean;
   codeKeywordsValid: boolean;
   reflectionValid: boolean;
 }
@@ -33,6 +34,15 @@ export const validateLabSubmission = (
     if (!isHttps) {
       score -= 25;
       feedbackMessages.push("Deployed application URL must use secure HTTPS protocols.");
+    }
+  }
+
+  if (lab.requiredEvidence.includes("screenshot")) {
+    const screenshotUrls = submission.screenshotUrls || [];
+    const hasHttpsEvidence = screenshotUrls.some(url => url.trim().toLowerCase().startsWith("https://"));
+    if (!hasHttpsEvidence) {
+      score -= 20;
+      feedbackMessages.push("At least one screenshot, screen recording, or shared evidence link must be provided as an HTTPS URL.");
     }
   }
 
@@ -73,6 +83,7 @@ export const validateLabSubmission = (
     checklistPassed: checklistCompleted,
     repoValid: submission.repoUrl ? submission.repoUrl.startsWith("https://github.com/") : true,
     deployedUrlValid: submission.deployedUrl ? submission.deployedUrl.startsWith("https://") : true,
+    screenshotValid: !lab.requiredEvidence.includes("screenshot") || (submission.screenshotUrls || []).some(url => url.startsWith("https://")),
     codeKeywordsValid: (submission.submittedCode || "").length >= 20,
     reflectionValid: (submission.reflection || "").length >= 50
   };

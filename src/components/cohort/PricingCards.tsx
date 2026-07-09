@@ -50,7 +50,7 @@ export function PricingCards() {
             </ul>
 
             <Link
-              to={`/apply?plan=${plan.id}`}
+              to={`/enroll?plan=${plan.id}`}
               onClick={() => handlePricingClick(plan.id)}
               className={`mt-auto inline-flex min-h-12 items-center justify-center rounded-lg px-5 py-3 text-sm font-black transition ${
                 plan.recommended

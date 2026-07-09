@@ -1,6 +1,6 @@
 export const COHORT_APPLICATION_FORM_URL =
   import.meta.env.VITE_COHORT_APPLICATION_FORM_URL ||
-  "mailto:nkefua@ndnanalytics.com?subject=AI%20MVP%20Builder%20Africa%20Cohort%201%20Application";
+  "/enroll";
 
 export const COHORT_LEAD_EMAIL = "nkefua@ndnanalytics.com";
 
@@ -33,10 +33,10 @@ export const cohortSeo = {
     canonicalPath: "/cohort-1",
   },
   apply: {
-    title: "Apply for AI MVP Builder Africa - Cohort 1",
+    title: "Enroll for AI MVP Builder Africa - Cohort 1",
     description:
-      "Apply to join the first NDN Analytics Academy cohort for African builders learning to create MVP apps with AI. Only 10 seats available.",
-    canonicalPath: "/apply",
+      "Enroll for the first NDN Analytics Academy cohort for African builders learning to create MVP apps with AI. Only 10 seats available.",
+    canonicalPath: "/enroll",
   },
   curriculum: {
     title: "AI MVP Builder Africa Curriculum",
@@ -142,7 +142,7 @@ export const instructor = {
 };
 
 export const applicationSteps = [
-  "Apply using the cohort application form.",
+  "Enroll using the cohort form.",
   "Share your app idea and learning goals.",
   `Your application details are sent to ${COHORT_LEAD_EMAIL}.`,
   "Receive confirmation and payment instructions.",

@@ -11,7 +11,7 @@ interface ApplicationCTAProps {
 export function ApplicationCTA({
   title = "Your app idea deserves a first version.",
   subtitle = "Join Cohort 1 and learn how to build your MVP with AI in 6 weeks.",
-  cta = "Apply for Cohort 1",
+  cta = "Enroll for Cohort 1",
 }: ApplicationCTAProps) {
   const handleApplyClick = () => {
     // TODO: Add Meta Pixel event: CohortApplyClick
@@ -27,7 +27,7 @@ export function ApplicationCTA({
         {subtitle}
       </p>
       <Link
-        to="/apply"
+        to="/enroll"
         onClick={handleApplyClick}
         className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#F5B400] px-6 py-3 text-sm font-black text-[#071527] transition hover:bg-[#FFD166]"
       >
@@ -35,7 +35,7 @@ export function ApplicationCTA({
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>
       <p className="mt-4 text-sm font-semibold text-slate-300">
-        Applicant and lead emails go to{" "}
+        Enrollment and lead emails go to{" "}
         <a href={getCohortLeadMailto()} className="text-[#FDE68A] underline">
           {COHORT_LEAD_EMAIL}
         </a>

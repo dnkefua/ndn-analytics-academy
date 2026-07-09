@@ -14,8 +14,8 @@ export const cohortAds: CohortAdVariant[] = [
     angle: "Outcome-Focused",
     headline: "Build Your MVP App in 6 Weeks",
     primaryText:
-      "Build your first MVP app in 6 weeks using AI.\n\nNDN Analytics Academy is launching its first premium cohort for African founders, students, and business owners who want to turn an app idea into a working MVP.\n\nYou will learn how to plan your app, design screens, build core features, use Firebase, add AI features, and prepare your demo.\n\nOnly 10 seats are available. Early-bird seats start at $420 for the first 3 students.\n\nMessage us to apply.",
-    cta: "Send Message",
+      "Build your first MVP app in 6 weeks using AI.\n\nNDN Analytics Academy is launching its first premium cohort for African founders, students, and business owners who want to turn an app idea into a working MVP.\n\nYou will learn how to plan your app, design screens, build core features, use Firebase, add AI features, and prepare your demo.\n\nOnly 10 seats are available. Early-bird seats start at $420 for the first 3 students.\n\nEnroll here: https://www.ndnanalytics.com/enroll",
+    cta: "Enroll Now",
   },
   {
     test: "A/B Test 1",
@@ -23,8 +23,8 @@ export const cohortAds: CohortAdVariant[] = [
     angle: "Mission-Focused",
     headline: "AI App Building for African Founders",
     primaryText:
-      "Africa needs more builders, not just more ideas.\n\nNDN Analytics Academy is launching a 6-week AI MVP Builder cohort to help African founders, students, and business owners learn how to create real apps using AI.\n\nBring your idea. We will help you structure it, design it, build it, and present your MVP.\n\nOnly 10 people will join the first cohort. Early-bird seats start at $420.\n\nApply now.",
-    cta: "Apply Now",
+      "Africa needs more builders, not just more ideas.\n\nNDN Analytics Academy is launching a 6-week AI MVP Builder cohort to help African founders, students, and business owners learn how to create real apps using AI.\n\nBring your idea. We will help you structure it, design it, build it, and present your MVP.\n\nOnly 10 people will join the first cohort. Early-bird seats start at $420.\n\nEnroll now: https://www.ndnanalytics.com/enroll",
+    cta: "Enroll Now",
   },
   {
     test: "A/B Test 2",
@@ -32,8 +32,8 @@ export const cohortAds: CohortAdVariant[] = [
     angle: "Founder Pain",
     headline: "Stop Waiting. Build Your MVP.",
     primaryText:
-      "You have an app idea, but you do not know where to start.\n\nThis 6-week cohort will help you turn your idea into a clear MVP plan, app screens, database structure, AI feature, and demo.\n\nYou do not need to be an expert developer to begin. You need a clear problem, the right tools, and guided mentorship.\n\nCohort 1 is limited to 10 students. Early-bird seats start at $420.\n\nMessage us to apply.",
-    cta: "Send Message",
+      "You have an app idea, but you do not know where to start.\n\nThis 6-week cohort will help you turn your idea into a clear MVP plan, app screens, database structure, AI feature, and demo.\n\nYou do not need to be an expert developer to begin. You need a clear problem, the right tools, and guided mentorship.\n\nCohort 1 is limited to 10 students. Early-bird seats start at $420.\n\nEnroll here: https://www.ndnanalytics.com/enroll",
+    cta: "Enroll Now",
   },
   {
     test: "A/B Test 2",
@@ -59,7 +59,7 @@ export const cohortAds: CohortAdVariant[] = [
     angle: "Transformation",
     headline: "From App Idea to MVP",
     primaryText:
-      "In 6 weeks, your app idea can become a working MVP direction.\n\nThis first NDN Analytics Academy cohort is designed for African founders, students, and business owners who want guided support to build their first AI-powered app.\n\nYou will leave with a product plan, app screens, Firebase structure, AI feature, demo, and launch roadmap.\n\nApply for Cohort 1.",
-    cta: "Apply Now",
+      "In 6 weeks, your app idea can become a working MVP direction.\n\nThis first NDN Analytics Academy cohort is designed for African founders, students, and business owners who want guided support to build their first AI-powered app.\n\nYou will leave with a product plan, app screens, Firebase structure, AI feature, demo, and launch roadmap.\n\nEnroll for Cohort 1: https://www.ndnanalytics.com/enroll",
+    cta: "Enroll Now",
   },
 ];
