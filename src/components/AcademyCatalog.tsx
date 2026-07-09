@@ -3,6 +3,8 @@ import { COURSES } from '../data/courses';
 import { MODULES } from '../data/modules';
 import { Course, CourseCategory, CourseLevel } from '../types/academy';
 import { Search, Filter, Clock, Award, BookOpen, ChevronRight, Play, Eye } from 'lucide-react';
+import { FadeInStagger, FadeInStaggerItem } from './ui/motion';
+import { UniswapButton } from './ui/UniswapButton';
 
 interface AcademyCatalogProps {
   onSelectCourse: (course: Course) => void;
@@ -73,13 +75,14 @@ export const AcademyCatalog: React.FC<AcademyCatalogProps> = ({
                   <span className="text-xs font-bold text-cyan-300 shrink-0">{pct}% complete</span>
                 </div>
               </div>
-              <button
+              <UniswapButton
                 onClick={() => onStartCourse(activeCourse.id)}
-                className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition-all flex items-center space-x-2 cursor-pointer shadow-lg shadow-cyan-500/25 shrink-0"
+                variant="secondary"
+                size="md"
+                icon={<Play className="w-4 h-4 fill-current" />}
               >
-                <Play className="w-4 h-4" />
-                <span>Resume</span>
-              </button>
+                Resume
+              </UniswapButton>
             </div>
           </div>
         );
@@ -134,14 +137,14 @@ export const AcademyCatalog: React.FC<AcademyCatalogProps> = ({
       </div>
 
       {/* Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => {
           const courseModules = MODULES.filter(m => m.courseId === course.id);
           const progressPercent = learnerProgressPercentMap[course.id] || 0;
           const isActive = activeCourseId === course.id;
 
           return (
-            <div
+            <FadeInStaggerItem
               key={course.id}
               className={`group rounded-2xl bg-slate-900/90 border transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-lg ${
                 isActive ? 'border-cyan-500 ring-1 ring-cyan-500/50' : 'border-slate-800/80 hover:border-slate-700 hover:shadow-cyan-500/10'
@@ -227,26 +230,30 @@ export const AcademyCatalog: React.FC<AcademyCatalogProps> = ({
 
               {/* Action Buttons */}
               <div className="p-6 pt-0 grid grid-cols-2 gap-3">
-                <button
+                <UniswapButton
                   onClick={() => onSelectCourse(course)}
-                  className="w-full py-2.5 px-3 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-[11px]"
+                  icon={<Eye className="w-3.5 h-3.5" />}
                 >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>View Overview</span>
-                </button>
+                  View Overview
+                </UniswapButton>
 
-                <button
+                <UniswapButton
                   onClick={() => onStartCourse(course.id)}
-                  className="w-full py-2.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-cyan-500/20"
+                  variant="secondary"
+                  size="sm"
+                  className="w-full text-[11px]"
+                  icon={<Play className="w-3.5 h-3.5 fill-current" />}
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>{progressPercent > 0 ? "Continue" : "Start Course"}</span>
-                </button>
+                  {progressPercent > 0 ? "Continue" : "Start Course"}
+                </UniswapButton>
               </div>
-            </div>
+            </FadeInStaggerItem>
           );
         })}
-      </div>
+      </FadeInStagger>
     </div>
   );
 };

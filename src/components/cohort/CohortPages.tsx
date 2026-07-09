@@ -28,8 +28,10 @@ import { OutcomeGrid } from "./OutcomeGrid";
 import { PricingCards } from "./PricingCards";
 import { ProblemCards } from "./ProblemCards";
 import { RevenueTarget } from "./RevenueTarget";
-import { StudentDashboardPreview } from "./StudentDashboardPreview";
 import { WeeklyLessonTemplate } from "./WeeklyLessonTemplate";
+import { FadeIn, FadeInStagger, BentoCard } from "../ui/motion";
+import { Sidebar } from "../Sidebar";
+import { Header } from "../Header";
 import {
   COHORT_LEAD_EMAIL,
   applicationSteps,
@@ -216,12 +218,18 @@ function CohortFooter() {
 }
 
 function CohortFrame({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   return (
-    <div className="min-h-screen bg-[#071527] text-slate-100">
-      <div className="fixed inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:28px_28px] opacity-35 pointer-events-none" />
-      <CohortNavigation />
-      <main className="relative z-10">{children}</main>
-      <CohortFooter />
+    <div className="min-h-screen bg-[#071527] text-slate-100 flex selection:bg-[#3FA9F5] selection:text-white">
+      <div className="fixed inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:28px_28px] opacity-35 pointer-events-none z-0" />
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen lg:ml-64 transition-all relative z-10">
+        <Header activeTab="" setActiveTab={() => {}} setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1">{children}</main>
+        <CohortFooter />
+      </div>
     </div>
   );
 }
@@ -239,18 +247,18 @@ function Section({
 }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <div className="mb-8 max-w-3xl">
+      <FadeIn className="mb-8 max-w-3xl">
         {eyebrow && (
-          <p className="mb-3 text-sm font-black uppercase tracking-[0.22em] text-[#F5B400]">
+          <p className="mb-3 text-sm font-black uppercase tracking-[0.22em] text-[#F5B400] drop-shadow-[0_0_5px_rgba(245,180,0,0.5)]">
             {eyebrow}
           </p>
         )}
-        <h2 className="text-3xl font-black leading-tight text-white sm:text-4xl">
+        <h2 className="text-3xl font-black leading-tight text-white sm:text-4xl tracking-tight">
           {title}
         </h2>
         {subtitle && <p className="mt-4 text-base leading-7 text-slate-300">{subtitle}</p>}
-      </div>
-      {children}
+      </FadeIn>
+      <FadeIn delay={0.2}>{children}</FadeIn>
     </section>
   );
 }
@@ -390,26 +398,26 @@ export function CohortLandingPage() {
         title="A guided 6-week path from idea to MVP"
         subtitle="The cohort breaks product building into a practical weekly sequence, so every student knows what to focus on next."
       >
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <FadeInStagger className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {solutionSteps.map((step, index) => (
-            <div key={step} className="rounded-lg border border-white/12 bg-white/6 p-5">
-              <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-[#3FA9F5]/15 text-sm font-black text-[#BAE6FD]">
+            <BentoCard key={step} className="flex flex-col h-full" span={index === solutionSteps.length - 1 && solutionSteps.length % 2 !== 0 ? 2 : 1}>
+              <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-[#3FA9F5]/30 to-[#3FA9F5]/5 text-lg font-black text-[#BAE6FD] shadow-[0_0_15px_rgba(63,169,245,0.2)]">
                 {index + 1}
               </div>
-              <p className="text-base font-black text-white">{step}</p>
-            </div>
+              <p className="text-lg font-black text-white">{step}</p>
+            </BentoCard>
           ))}
-        </div>
+        </FadeInStagger>
       </Section>
 
       <Section eyebrow="Who This Is For" title="Built for serious first-time and early-stage builders">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {audiences.map((audience) => (
-            <div key={audience} className="rounded-lg border border-white/12 bg-white/6 p-5">
-              <p className="text-sm font-black text-white">{audience}</p>
-            </div>
+        <FadeInStagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {audiences.map((audience, index) => (
+            <BentoCard key={audience} span={index === 0 || index === 3 ? 2 : 1}>
+              <p className="text-base font-black text-white">{audience}</p>
+            </BentoCard>
           ))}
-        </div>
+        </FadeInStagger>
         <div className="mt-6 rounded-lg border border-[#F59E0B]/35 bg-[#F59E0B]/10 p-5 text-sm font-semibold leading-7 text-slate-200">
           {notForText}
         </div>

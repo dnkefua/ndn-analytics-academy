@@ -13,6 +13,7 @@ import {
 import { calculateCourseGrade } from './services/gradingService';
 
 import { Header } from './components/Header';
+import { Sidebar } from './components/Sidebar';
 import { AcademyCatalog } from './components/AcademyCatalog';
 import { CourseDetail } from './components/CourseDetail';
 import { LessonView } from './components/LessonView';
@@ -53,6 +54,18 @@ function AcademyExperience() {
     }
     setActiveTab(tab);
   };
+
+  // Read tab parameter from URL search query on mount or path change
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      const validTabs: AppTab[] = ['catalog', 'detail', 'learn', 'quiz', 'projects', 'transcript', 'certificates'];
+      if (validTabs.includes(tabParam as AppTab)) {
+        setActiveTab(tabParam as AppTab);
+      }
+    }
+  }, [window.location.search]);
 
   // Sync progress state
   useEffect(() => {
@@ -130,21 +143,32 @@ function AcademyExperience() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex selection:bg-cyan-500 selection:text-slate-950">
       {/* Background Circuit Grid Accent */}
       <div className="fixed inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none z-0" />
 
-      {/* Header Navigation */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={(tab) => handleTabChange(tab as AppTab)}
-        studentName={learnerProgress.studentName}
-        learnerProgress={learnerProgress}
+      {/* Sidebar Navigation */}
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={(tab) => handleTabChange(tab as AppTab)} 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen} 
       />
 
-      {/* Main Container */}
-      <main className="flex-1 relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'catalog' && (
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen lg:ml-64 transition-all relative z-10">
+        {/* Header Navigation */}
+        <Header
+          activeTab={activeTab}
+          setActiveTab={(tab) => handleTabChange(tab as AppTab)}
+          studentName={learnerProgress.studentName}
+          learnerProgress={learnerProgress}
+          setSidebarOpen={setSidebarOpen}
+        />
+
+        {/* Main Container */}
+        <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {activeTab === 'catalog' && (
           <AcademyCatalog
             onSelectCourse={handleSelectCourse}
             onStartCourse={handleStartCourse}
@@ -210,7 +234,6 @@ function AcademyExperience() {
         )}
       </main>
 
-      {/* Floating AI Mentor Chat Button / Modal */}
       <div className="fixed bottom-6 right-6 z-50">
         {aiChatOpen ? (
           <div className="w-80 sm:w-96 h-[500px]">
@@ -230,6 +253,7 @@ function AcademyExperience() {
           </button>
         )}
       </div>
+    </div>
     </div>
   );
 }

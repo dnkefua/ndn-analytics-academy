@@ -1,6 +1,7 @@
 import React from 'react';
-import { BookOpen, Award, FileText, Layout, Play, ShieldCheck, HelpCircle, Flame, Zap } from 'lucide-react';
+import { BookOpen, Award, FileText, Layout, Play, ShieldCheck, HelpCircle, Flame, Zap, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { UniswapButton } from './ui/UniswapButton';
 import { LearnerProgress } from '../types/academy';
 import { computeLevel, computeStreak } from '../services/engagementService';
 
@@ -9,6 +10,7 @@ interface HeaderProps {
   setActiveTab: (tab: string) => void;
   studentName?: string;
   learnerProgress?: LearnerProgress;
+  setSidebarOpen?: (isOpen: boolean) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   studentName = "MSc Desmond Nkefua",
   learnerProgress,
+  setSidebarOpen,
 }) => {
   const location = useLocation();
   const level = learnerProgress ? computeLevel(learnerProgress) : null;
@@ -37,63 +40,22 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800 shadow-lg font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-2 flex flex-wrap items-center justify-between gap-y-2 gap-x-4">
-        {/* Brand */}
-        <div
-          onClick={() => setActiveTab('catalog')}
-          className="flex items-center space-x-3 cursor-pointer group shrink-0"
-        >
-          <img
-            src="/ndn_3d_logo.png"
-            alt="NDN 3D Logo"
-            className="w-9 h-9 object-contain rounded-lg border border-cyan-500/40 shadow-md group-hover:scale-105 transition-transform"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80';
-            }}
-          />
-          <div className="whitespace-nowrap">
-            <span className="font-extrabold text-white text-base tracking-tight font-display block">
-              NDN Analytics
-            </span>
-            <span className="text-[10px] text-cyan-400 font-bold tracking-widest uppercase block">
-              Academy Platform
+        {/* Mobile Hamburger Toggle & Brand */}
+        <div className="flex items-center gap-4">
+          {setSidebarOpen && (
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          <div className="lg:hidden flex items-center gap-2">
+            <span className="font-extrabold text-white text-sm tracking-tight font-display">
+              NDN Academy
             </span>
           </div>
         </div>
-
-        {/* Navigation Tabs */}
-        <nav className="hidden md:flex items-center space-x-1">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id || (activeTab === 'detail' && tab.id === 'catalog');
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-          <div className="mx-1 h-6 w-px bg-slate-800" />
-          {routeLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                location.pathname === link.href
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
 
         {/* Engagement + Learner Profile */}
         <div className="flex items-center space-x-3">
@@ -135,12 +97,14 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          <Link
+          <UniswapButton
             to="/enroll"
-            className="hidden lg:inline-flex min-h-10 items-center rounded-lg bg-amber-400 px-4 py-2 text-xs font-black text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-300"
+            variant="gold"
+            size="sm"
+            className="hidden lg:inline-flex shadow-lg shadow-[#F5B400]/20"
           >
             Enroll Now
-          </Link>
+          </UniswapButton>
           <div className="text-right hidden lg:block">
             <span className="text-xs font-bold text-white block">{studentName}</span>
             <span className="text-[10px] text-emerald-400 font-semibold block">
@@ -153,32 +117,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile Nav Bar */}
-      <div className="md:hidden flex overflow-x-auto border-t border-slate-800/80 px-2 py-1.5 space-x-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-1 rounded-md text-[11px] font-bold shrink-0 ${
-              activeTab === tab.id ? 'bg-cyan-500 text-slate-950' : 'text-slate-300'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-        {routeLinks.map((link) => (
-          <Link
-            key={link.href}
-            to={link.href}
-            className={`px-3 py-1 rounded-md text-[11px] font-bold shrink-0 ${
-              location.pathname === link.href ? 'bg-amber-400 text-slate-950' : 'text-slate-300'
-            }`}
-          >
-            {link.label}
-          </Link>
-        ))}
       </div>
     </header>
   );
