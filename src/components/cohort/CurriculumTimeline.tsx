@@ -30,7 +30,7 @@ export function CurriculumTimeline() {
             onClick={handleCurriculumClick}
             className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#3FA9F5] transition group-hover:text-[#BAE6FD]"
           >
-            View week detail
+            Open weekly lessons
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </article>

@@ -67,6 +67,7 @@ const navLinks = [
   { label: "Courses", href: "/" },
   { label: "Cohort 1", href: "/cohort-1" },
   { label: "Curriculum", href: "/courses/ai-mvp-builder-africa/curriculum" },
+  { label: "Weekly Lessons", href: "/courses/ai-mvp-builder-africa/week-1" },
   { label: "Enroll", href: "/enroll" },
   { label: "Dashboard", href: "/student-dashboard" },
   { label: "Certificate", href: "/certificate-preview" },

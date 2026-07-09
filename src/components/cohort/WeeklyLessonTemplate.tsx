@@ -1,6 +1,6 @@
-import { ArrowLeft, CheckCircle2, ClipboardList, FileText, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ClipboardList, FileText, PlayCircle, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { WeeklyLesson } from "../../data/curriculum";
+import { curriculumWeeks, type WeeklyLesson } from "../../data/curriculum";
 import { getWeeklySchedule } from "../../data/cohortSchedule";
 import { WeeklyScheduleSection } from "./WeeklyScheduleSection";
 
@@ -10,10 +10,14 @@ interface WeeklyLessonTemplateProps {
 
 export function WeeklyLessonTemplate({ lesson }: WeeklyLessonTemplateProps) {
   const schedule = getWeeklySchedule(lesson.week);
+  const orderedWeeks = [...curriculumWeeks].sort((a, b) => a.week - b.week);
+  const currentIndex = orderedWeeks.findIndex((w) => w.week === lesson.week);
+  const prevWeek = currentIndex > 0 ? orderedWeeks[currentIndex - 1] : null;
+  const nextWeek = currentIndex < orderedWeeks.length - 1 ? orderedWeeks[currentIndex + 1] : null;
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-wrap gap-3">
+      <div className="mb-6 flex flex-wrap gap-3">
         <Link
           to="/courses/ai-mvp-builder-africa/curriculum"
           className="inline-flex items-center gap-2 rounded-lg border border-white/12 bg-white/8 px-4 py-2 text-sm font-bold text-white hover:border-[#3FA9F5]/50"
@@ -28,6 +32,31 @@ export function WeeklyLessonTemplate({ lesson }: WeeklyLessonTemplateProps) {
           Enroll
         </Link>
       </div>
+
+      {/* Week switcher — jump directly to any week's day-to-day lessons */}
+      <nav aria-label="Weekly lessons" className="mb-8 rounded-lg border border-white/12 bg-white/6 p-3">
+        <p className="mb-2 px-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Weekly lessons</p>
+        <div className="flex flex-wrap gap-2">
+          {orderedWeeks.map((w) => {
+            const active = w.week === lesson.week;
+            return (
+              <Link
+                key={w.slug}
+                to={w.route}
+                aria-current={active ? "page" : undefined}
+                title={w.previewTitle}
+                className={`rounded-lg px-3 py-2 text-sm font-bold transition ${
+                  active
+                    ? "bg-[#3FA9F5] text-[#071527]"
+                    : "border border-white/12 bg-[#071527]/60 text-slate-200 hover:border-[#3FA9F5]/50 hover:text-white"
+                }`}
+              >
+                Week {w.week}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       <header className="rounded-lg border border-white/12 bg-white/6 p-6">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F5B400]">
@@ -163,6 +192,47 @@ export function WeeklyLessonTemplate({ lesson }: WeeklyLessonTemplateProps) {
           </div>
         </section>
       </div>
+
+      {/* Previous / Next week navigation */}
+      <nav aria-label="Week navigation" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-stretch sm:justify-between">
+        {prevWeek ? (
+          <Link
+            to={prevWeek.route}
+            className="group flex flex-1 items-center gap-3 rounded-lg border border-white/12 bg-white/6 p-4 text-left transition hover:border-[#3FA9F5]/50 hover:bg-white/8"
+          >
+            <ArrowLeft className="h-5 w-5 flex-none text-[#3FA9F5]" aria-hidden="true" />
+            <span className="min-w-0">
+              <span className="block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Previous week</span>
+              <span className="block truncate font-black text-white">Week {prevWeek.week}: {prevWeek.title}</span>
+            </span>
+          </Link>
+        ) : (
+          <span className="flex-1" />
+        )}
+        {nextWeek ? (
+          <Link
+            to={nextWeek.route}
+            className="group flex flex-1 items-center justify-end gap-3 rounded-lg border border-white/12 bg-white/6 p-4 text-right transition hover:border-[#3FA9F5]/50 hover:bg-white/8"
+          >
+            <span className="min-w-0">
+              <span className="block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Next week</span>
+              <span className="block truncate font-black text-white">Week {nextWeek.week}: {nextWeek.title}</span>
+            </span>
+            <ArrowRight className="h-5 w-5 flex-none text-[#3FA9F5]" aria-hidden="true" />
+          </Link>
+        ) : (
+          <Link
+            to="/enroll"
+            className="flex flex-1 items-center justify-end gap-3 rounded-lg border border-[#F5B400]/40 bg-[#F5B400]/10 p-4 text-right transition hover:bg-[#F5B400]/15"
+          >
+            <span className="min-w-0">
+              <span className="block text-xs font-bold uppercase tracking-[0.16em] text-[#F5B400]">You reached the final week</span>
+              <span className="block truncate font-black text-white">Enroll to build your MVP</span>
+            </span>
+            <ArrowRight className="h-5 w-5 flex-none text-[#F5B400]" aria-hidden="true" />
+          </Link>
+        )}
+      </nav>
     </article>
   );
 }
